@@ -102,7 +102,6 @@ wire [4 : 0] ex_rd;
 ///////////////////////////////////////////
 
 wire [DATA_WIDTH - 1 : 0] mem_pc_plus_4;
-wire [DATA_WIDTH - 1 : 0] mem_pc_target;
 wire mem_taken;
 
 wire mem_memread;
@@ -156,7 +155,7 @@ adder m_pc_plus_4_adder(
 
 always @(posedge clk) begin
   if (rstn == 1'b0) PC <= 32'h00000000;
-  else PC <= mem_pc_target;
+  else PC <= ex_pc_target;
 end
 
 assign if_PC = PC;
@@ -203,21 +202,9 @@ assign id_rd  = id_instruction[11 : 7];
 
 /* m_hazard: hazard detection unit */
 
-// hazard m_hazard(
-//   // TODO: implement hazard detection unit & do wiring
-//   .clk        (clk),
-//
-//   .id_rs1     (id_rs1),
-//   .id_rs2     (id_rs2),
-//   .ex_rs2     (ex_rs2),
-//   .ex_memread (ex_memread),
-//
-//   .if_flush   (if_flush),
-//   .id_flush   (id_flush),
-//   .ex_flush   (ex_flush),
-//   .pc_write   (pc_write),
-//   .ifid_wrtie (ifid_wrtie),
-// );
+hazard m_hazard(
+  // TODO: implement hazard detection unit & do wiring
+);
 
 /* m_control: control unit */
 
@@ -354,9 +341,6 @@ branch_control m_branch_control(
 
 wire [1 : 0] fwdA, fwdB;
 
-// assign fwdA = 2'b00;
-// assign fwdB = 2'b00;
-
 forwarding m_forwarding(
   // TODO: implement forwarding unit & do wiring
   // Input
@@ -409,8 +393,6 @@ exmem_reg m_exmem_reg(
   .ex_flush       (ex_flush),
 
   .ex_pc_plus_4   (ex_pc_plus_4),
-  .ex_pc_target   (ex_pc_target),
-  .ex_taken       (ex_taken),
   .ex_jump        (ex_jump),
   .ex_memread     (ex_memread),
   .ex_memwrite    (ex_memwrite),
@@ -422,8 +404,6 @@ exmem_reg m_exmem_reg(
   .ex_rd          (ex_rd),
 
   .mem_pc_plus_4  (mem_pc_plus_4),
-  .mem_pc_target  (mem_pc_target),
-  .mem_taken      (mem_taken),
   .mem_jump       (mem_jump),
   .mem_memread    (mem_memread),
   .mem_memwrite   (mem_memwrite),
