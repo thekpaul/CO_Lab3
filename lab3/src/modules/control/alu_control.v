@@ -3,7 +3,7 @@
 /* This unit generates a 4-bit ALU control input (alu_func)
  * based on the 2-bit ALUOp control, funct7, and funct3 field.
  *
- * ALUOp | ALU action | notes  
+ * ALUOp | ALU action | notes
  * ------|------------|---------------------
  *   00  | add        | for loads and stores
  *   01  | subtract   | for branches
@@ -41,14 +41,18 @@ assign funct = {funct7[5], funct3};
 // combinational logic
 always @(*) begin
   case (alu_op)
-    2'b00: begin
-      ///////////////////////////////////////////////////////////////////////
-      // TODO : select operation for loads/stores
-      ///////////////////////////////////////////////////////////////////////
-    end
+    2'b00: alu_func = `OP_ADD; // TODO : select operation for loads/stores
     2'b01: begin
       ///////////////////////////////////////////////////////////////////////
       // TODO : select operation for branches
+
+      casex (funct)
+        4'bX_00X: alu_func = `OP_SUB;
+        4'bX_10X: alu_func = `OP_BGE;
+        4'bX_11X: alu_func = `OP_BGEU;
+        default:  alu_func = `OP_EEE;  // shoud not fall here
+      endcase
+
       ///////////////////////////////////////////////////////////////////////
     end
     2'b10: begin                // R-types
@@ -63,12 +67,26 @@ always @(*) begin
         4'b1_101: alu_func = `OP_SRA;
         4'b0_010: alu_func = `OP_SLT;
         4'b0_011: alu_func = `OP_SLTU;
-        default:  alu_func = `OP_EEE;  // shoud not fall here 
+        default:  alu_func = `OP_EEE;  // shoud not fall here
       endcase
     end
     2'b11: begin
       ///////////////////////////////////////////////////////////////////////
       // TODO : select operation for I-types with immediate
+
+      casex (funct)
+        4'bX_000: alu_func = `OP_ADD;
+        4'bX_100: alu_func = `OP_XOR;
+        4'bX_110: alu_func = `OP_OR;
+        4'bX_111: alu_func = `OP_AND;
+        4'b0_001: alu_func = `OP_SLL;
+        4'b0_101: alu_func = `OP_SRL;
+        4'b1_101: alu_func = `OP_SRA;
+        4'bX_010: alu_func = `OP_SLT;
+        4'bX_011: alu_func = `OP_SLTU;
+        default:  alu_func = `OP_EEE;  // shoud not fall here
+      endcase
+
       ///////////////////////////////////////////////////////////////////////
     end
     default: alu_func = `OP_EEE;       // should not fall here

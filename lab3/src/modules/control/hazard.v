@@ -6,6 +6,7 @@
 // hazard detection unit
 
 module hazard (
+
 );
 
 

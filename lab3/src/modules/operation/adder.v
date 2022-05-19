@@ -1,10 +1,10 @@
 module adder #(
   parameter DATA_WIDTH = 32
 )(
-  input [DATA_WIDTH-1:0] in_a,
-  input [DATA_WIDTH-1:0] in_b,
+  input [DATA_WIDTH - 1 : 0] in_a,
+  input [DATA_WIDTH - 1 : 0] in_b,
 
-  output reg [DATA_WIDTH-1:0] result
+  output reg [DATA_WIDTH - 1 : 0] result
 );
 
 always @(*) begin
