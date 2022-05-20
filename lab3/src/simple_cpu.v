@@ -204,19 +204,22 @@ assign id_rd  = id_instruction[11 : 7];
 
 hazard m_hazard(
   // TODO: implement hazard detection unit & do wiring
-  .id_rs1    (id_rs1),
-  .id_rs2    (id_rs2),
-  .opcode    (opcode),
-  .ex_rd     (ex_rd),
-  .mem_rd    (mem_rd),
-  .wb_rd     (wb_rd),
-  .pc_plus_4 (ex_pc_plus_4),
-  .pc_target (ex_pc_target),
+  .id_rs1       (id_rs1),
+  .id_rs2       (id_rs2),
+  .opcode       (opcode),
+  .ex_rd        (ex_rd),
+  .mem_rd       (mem_rd),
+  .wb_rd        (wb_rd),
+  .ex_regwrite  (ex_regwrite),
+  .mem_regwrite (mem_regwrite),
+  .wb_regwrite  (wb_regwrite),
+  .pc_plus_4    (ex_pc_plus_4),
+  .pc_target    (ex_pc_target),
 
-  .if_flush  (if_flush),
-  .id_flush  (id_flush),
-  .ex_flush  (ex_flush),
-  .do_stall  (stall)
+  .if_flush     (if_flush),
+  .id_flush     (id_flush),
+  .ex_flush     (ex_flush),
+  .do_stall     (stall)
 );
 
 /* m_control: control unit */

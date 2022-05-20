@@ -14,6 +14,9 @@ module hazard #(
   input [4 : 0] ex_rd,
   input [4 : 0] mem_rd,
   input [4 : 0] wb_rd,
+  input ex_regwrite,
+  input mem_regwrite,
+  input wb_regwrite,
   input [DATA_WIDTH - 1 : 0] pc_plus_4,
   input [DATA_WIDTH - 1 : 0] pc_target,
 
