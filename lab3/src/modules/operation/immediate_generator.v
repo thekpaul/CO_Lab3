@@ -33,7 +33,14 @@ always @(*) begin
     7'b110_1111: sextimm = $signed({instruction[31], instruction[19:12], instruction[20], instruction[30:21], 1'b0});
 
     // JALR
-    7'b110_0111: sextimm = $signed({instruction[31], instruction[31:20]});
+    7'b110_0111: sextimm = $signed({instruction[31:20]});
+
+    // LUI
+    7'b011_0111: sextimm = $signed({instruction[31:12]});
+
+    // AUIPC
+    7'b001_0111: sextimm = $signed({instruction[31:12]});
+
 
     //////////////////////////////////////////////////////////////////////////
     default:     sextimm = 32'h0000_0000;
