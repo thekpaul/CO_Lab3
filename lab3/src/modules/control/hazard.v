@@ -51,7 +51,7 @@ always @(*) begin
   if (pc_plus_4 != pc_target) flush = 1'b1;
 
   // USAGE Determination
-  casex (opcode) begin
+  casex (opcode)
     7'b011_0011: use_rs <= 3'b11X; // R
     7'b001_0011: use_rs <= 3'b01X; // I
     7'b000_0011: use_rs <= 3'b01X; // L
