@@ -1,22 +1,22 @@
 // control.v
 
 // The main control module takes as input the opcode field of an instruction
-// (i.e., instruction[6:0]) and generates a set of control signals.
+// (i.e., instruction[6 : 0]) and generates a set of control signals.
 
 module control(
-  input [6:0] opcode,
+  input [6 : 0] opcode,
 
-  output [1:0] jump,
+  output [1 : 0] jump,
   output branch,
   output mem_read,
   output mem_to_reg,
-  output [1:0] alu_op,
+  output [1 : 0] alu_op,
   output mem_write,
   output alu_src,
   output reg_write
 );
 
-reg [9:0] controls;
+reg [9 : 0] controls;
 
 // combinational logic
 always @(*) begin
@@ -37,6 +37,10 @@ always @(*) begin
     7'b110_1111: controls = 10'b01_001_XX_011; // J-type
 
     7'b110_0111: controls = 10'b11_001_XX_011; // JALR
+
+    7'b011_0111: controls = 10'b00_001_XX_011; // LUI
+
+    7'b001_0111: controls = 10'b00_001_XX_011; // AUIPC
 
     //////////////////////////////////////////////////////////////////////////
 
