@@ -2,8 +2,7 @@
 
 // This module determines if the values need to be forwarded to the EX stage.
 
-// TODO: declare propoer input and output ports and implement the
-// forwarding unit
+// TODO: declare proper input and output ports and implement forwarding unit
 
 module forwarding (
   // Input
