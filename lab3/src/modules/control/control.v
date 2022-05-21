@@ -6,6 +6,7 @@
 module control(
   input [6 : 0] opcode,
 
+  output [1 : 0] ui,
   output [1 : 0] jump,
   output branch,
   output mem_read,
@@ -16,7 +17,7 @@ module control(
   output reg_write
 );
 
-reg [9 : 0] controls;
+reg [11 : 0] controls;
 
 // combinational logic
 always @(*) begin
@@ -26,28 +27,29 @@ always @(*) begin
     //////////////////////////////////////////////////////////////////////////
     // TODO : Implement signals for other instruction types
 
-    7'b001_0011: controls = 10'b00_000_11_011; // I-type
+    7'b001_0011: controls = 12'b00_00_000_11_011; // I-type
 
-    7'b000_0011: controls = 10'b00_011_00_011; // I-type Load
+    7'b000_0011: controls = 12'b00_00_011_00_011; // I-type Load
 
-    7'b010_0011: controls = 10'b00_000_00_110; // S-type
+    7'b010_0011: controls = 12'b00_00_000_00_110; // S-type
 
-    7'b110_0011: controls = 10'b00_10X_01_000; // B-type
+    7'b110_0011: controls = 12'b00_00_10X_01_000; // B-type
 
-    7'b110_1111: controls = 10'b01_001_XX_011; // J-type
+    7'b110_1111: controls = 12'b00_01_001_XX_011; // J-type
 
-    7'b110_0111: controls = 10'b11_001_XX_011; // JALR
+    7'b110_0111: controls = 12'b00_11_001_XX_011; // JALR
 
-    7'b011_0111: controls = 10'b00_001_XX_011; // LUI
+    7'b011_0111: controls = 12'b10_00_001_00_011; // LUI
 
-    7'b001_0111: controls = 10'b00_001_XX_011; // AUIPC
+    7'b001_0111: controls = 12'b11_00_001_00_011; // AUIPC
 
     //////////////////////////////////////////////////////////////////////////
 
-    default:     controls = 10'b00_000_00_000;
+    default:     controls = 12'b00_00_000_00_000;
   endcase
 end
 
-assign {jump, branch, mem_read, mem_to_reg, alu_op, mem_write, alu_src, reg_write} = controls;
+assign {ui, jump, branch, mem_read, mem_to_reg,
+        alu_op, mem_write, alu_src, reg_write} = controls;
 
 endmodule

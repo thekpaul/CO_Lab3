@@ -42,6 +42,7 @@ wire [DATA_WIDTH - 1 : 0] id_pc_plus_4;
 wire [DATA_WIDTH - 1 : 0] id_instruction;
 
 // ex control
+wire [1 : 0] id_ui;
 wire [1 : 0] id_jump;
 wire id_branch;
 wire [1 : 0] id_aluop;
@@ -70,6 +71,8 @@ wire [4 : 0] id_rd;
 
 wire [DATA_WIDTH - 1 : 0] ex_PC;
 
+wire [1 : 0] ex_ui;
+wire [1 : 0] ex_jump;
 wire ex_branch;
 wire [1 : 0] ex_aluop;
 wire ex_alusrc;
@@ -88,7 +91,6 @@ wire ex_taken;
 wire ex_memread;
 wire ex_memwrite;
 
-wire [1 : 0] ex_jump;
 wire ex_memtoreg;
 wire ex_regwrite;
 
@@ -226,6 +228,7 @@ hazard m_hazard(
 control m_control(
   .opcode     (opcode),
 
+  .ui         (id_ui),
   .jump       (id_jump),
   .branch     (id_branch),
   .alu_op     (id_aluop),
@@ -267,6 +270,7 @@ idex_reg m_idex_reg(
 
   .id_PC        (id_PC),
   .id_pc_plus_4 (id_pc_plus_4),
+  .id_ui        (id_ui),
   .id_jump      (id_jump),
   .id_branch    (id_branch),
   .id_aluop     (id_aluop),
@@ -286,6 +290,7 @@ idex_reg m_idex_reg(
 
   .ex_PC        (ex_PC),
   .ex_pc_plus_4 (ex_pc_plus_4),
+  .ex_ui        (ex_ui),
   .ex_jump      (ex_jump),
   .ex_branch    (ex_branch),
   .ex_aluop     (ex_aluop),
@@ -307,53 +312,6 @@ idex_reg m_idex_reg(
 ///////////////////////////////////////////////////////////////////////////////
 // Execute (EX)
 ///////////////////////////////////////////////////////////////////////////////
-
-/* alu control: generates alu_func signal */
-wire [3 : 0] alu_func;
-
-alu_control m_alu_control(
-  .alu_op   (ex_aluop),
-  .funct7   (ex_funct7),
-  .funct3   (ex_funct3),
-
-  .alu_func (alu_func)
-);
-
-/* m_alu */
-wire [31 : 0] alu_in1, alu_in2;
-wire alu_check;
-
-assign alu_in1 = fwd_data1;
-assign alu_in2 = (ex_alusrc == 1'b0) ? fwd_data2 : ex_sextimm;
-
-alu m_alu(
-  .alu_func (alu_func),
-  .in_a     (alu_in1),
-  .in_b     (alu_in2), // is input with reg allowed??
-
-  .result   (ex_alu_result),
-  .check    (alu_check)
-);
-
-wire [DATA_WIDTH - 1 : 0] ex_branch_dest;
-
-/* m_branch_target_adder: PC + imm for branch address */
-adder m_branch_target_adder(
-  .in_a   (ex_PC),
-  .in_b   (ex_sextimm),
-
-  .result (ex_branch_dest)
-);
-
-/* m_branch_control: checks T/NT */
-wire taken;
-
-branch_control m_branch_control(
-  .branch (ex_branch),
-  .check  (alu_check),
-
-  .taken  (ex_taken)
-);
 
 wire [1 : 0] fwdA, fwdB;
 
@@ -388,6 +346,59 @@ mux_3x1 muxB(fwdB,
   fwd_data2       // Target Var
 );
 
+/* alu control: generates alu_func signal */
+wire [3 : 0] alu_func;
+
+alu_control m_alu_control(
+  .alu_op   (ex_aluop),
+  .funct7   (ex_funct7),
+  .funct3   (ex_funct3),
+
+  .alu_func (alu_func)
+);
+
+/* m_alu */
+wire [31 : 0] alu_in1, alu_in2;
+wire alu_check;
+
+mux_4x1 muxu(ex_ui,
+  fwd_data1,     // 00 => Proceed as Normal, NOT U-TYPE
+  32'h0000_0000, // 01 => Undefined, ERROR
+  32'h0000_0000, // 10 => U-type & LUI
+  ex_PC,         // 11 => U-type & AUIPC
+  alu_in1
+);
+
+assign alu_in2 = (ex_alusrc == 1'b0) ? fwd_data2 : ex_sextimm;
+
+alu m_alu(
+  .alu_func (alu_func),
+  .in_a     (alu_in1),
+  .in_b     (alu_in2), // is input with reg allowed??
+
+  .result   (ex_alu_result),
+  .check    (alu_check)
+);
+
+wire [DATA_WIDTH - 1 : 0] ex_branch_dest;
+
+/* m_branch_target_adder: PC + imm for branch address */
+adder m_branch_target_adder(
+  .in_a   (ex_PC),
+  .in_b   (ex_sextimm),
+
+  .result (ex_branch_dest)
+);
+
+/* m_branch_control: checks T/NT */
+wire taken;
+
+branch_control m_branch_control(
+  .branch (ex_branch),
+  .check  (alu_check),
+
+  .taken  (ex_taken)
+);
 
 mux_4x1 muxj(ex_jump,          // Jump[1 : 0] => 00 (X) / 01 (JAL) / 11 (JALR)
   (ex_branch == 1'b0 || ex_taken != ex_funct3[0])
@@ -399,6 +410,20 @@ mux_4x1 muxj(ex_jump,          // Jump[1 : 0] => 00 (X) / 01 (JAL) / 11 (JALR)
   (ex_readdata1 + ex_sextimm), // 11 => JALR, Add `imm` to `rs1` TODO
   ex_pc_target
 );
+
+// wire [DATA_WIDTH - 1 : 0] u_result;
+//
+// mux_2x1 muxu(opcode[5],
+//   ex_PC + ex_sextimm, // 0`0`10111 => AUIPC
+//   ex_sextimm,         // 0`1`10111 => LUI
+//   u_result
+// );
+//
+// mux_2x1 muxx(
+//   ex_alu_result, // => NOT U-type Inst. -> Pass ALU_RESULT
+//   u_result,      // =>     U-type Inst. -> Pass U_RESULT
+//   ex_alu_result
+// );
 
 assign ex_writedata = fwd_data2;
 

@@ -18,6 +18,7 @@ module idex_reg #(
   input [DATA_WIDTH - 1 : 0] id_pc_plus_4,
 
   // ex control
+  input [1 : 0] id_ui,
   input [1 : 0] id_jump,
   input id_branch,
   input [1 : 0] id_aluop,
@@ -47,6 +48,7 @@ module idex_reg #(
   output reg [DATA_WIDTH - 1 : 0] ex_pc_plus_4,
 
   // ex control
+  output reg [1 : 0] ex_ui,
   output reg ex_branch,
   output reg [1 : 0] ex_aluop,
   output reg ex_alusrc,
@@ -76,6 +78,7 @@ always @(posedge clk) begin
   if ((id_flush == 1'b1) || (do_stall == 1'b1)) begin
     ex_PC        <= 32'hXXXX_XXXX;
     ex_pc_plus_4 <= 32'hXXXX_XXXX;
+    ex_ui        <= 2'bXX;
     ex_jump      <= 2'bXX;
     ex_branch    <= 1'bX;
     ex_aluop     <= 2'bXX;
@@ -95,6 +98,7 @@ always @(posedge clk) begin
   end else begin
     ex_PC        <= id_PC;
     ex_pc_plus_4 <= id_pc_plus_4;
+    ex_ui        <= id_ui;
     ex_jump      <= id_jump;
     ex_branch    <= id_branch;
     ex_aluop     <= id_aluop;

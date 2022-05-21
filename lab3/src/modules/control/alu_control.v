@@ -4,8 +4,8 @@
  * based on the 2-bit ALUOp control, funct7, and funct3 field.
  *
  * ALUOp | ALU action | notes
- * ------|------------|---------------------
- *   00  | add        | for loads and stores
+ * ------|------------|-------------------------------
+ *   00  | add        | for loads, stores and U-types
  *   01  | subtract   | for branches
  *   10  | it varies  | for R-types
  *   11  | it varies  | immediate
