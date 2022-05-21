@@ -3,7 +3,7 @@ import random
 import subprocess
 import argparse
 
-unit_tests = [ 
+unit_tests = [
           [ 'task1/1', 'data/unit_tests/task1/1/inst.mem', 'data/unit_tests/task1/1/reg-out.mem' ],
           [ 'task1/2', 'data/unit_tests/task1/2/inst.mem', 'data/unit_tests/task1/2/reg-out.mem' ],
           [ 'task2/1', 'data/unit_tests/task2/1/inst.mem', 'data/unit_tests/task2/1/reg-out.mem' ],
@@ -35,7 +35,7 @@ def get_ans_reg(path_to_reg):
     reg_f = open(os.path.join(cwd, path_to_reg), "r")
     lines = reg_f.readlines()
 
-    reg = [] 
+    reg = []
     for line in lines:
         words = line.split()
         if len(words) == 0:
@@ -52,7 +52,7 @@ def get_veri_reg():
     cwd = os.getcwd()
     reg_f = open(os.path.join(cwd, "data/stat.out"), "r")
     lines = reg_f.readlines()
-    
+
     reg = []
     for line in lines:
         words = line.split()
@@ -78,7 +78,7 @@ def print_hw_stats():
         words = line.split()
         if len(words) == 0:
             continue
-        else: 
+        else:
             for hw_counter in hw_counters:
                 if hw_counter in words[1]:
                     print("[*] {}: {}".format(hw_counter, words[2]))
@@ -93,7 +93,7 @@ def check_sim(tests, test_type):
             os.system('cp ' + './data/' + test_type + '/' + test[0] + '/register.mem' + ' ./data/register.mem')
         if os.path.exists("./data/" + test_type + '/' + test[0] + '/data.mem'):
             os.system('cp ' + './data/' + test_type + '/' + test[0] + '/data.mem' + ' ./data/data_memory.mem')
- 
+
         ans_reg = get_ans_reg(test[2])
 
         print("[*] Your register values should be")
@@ -111,7 +111,7 @@ def check_sim(tests, test_type):
             os.system("rm ./data/inst.mem ./data/stat.out")
         else:
             print("------ [Failed] -----")
-            os.system("cat ./data/stat.out")
+          # os.system("cat ./data/stat.out")
             break
 
 
