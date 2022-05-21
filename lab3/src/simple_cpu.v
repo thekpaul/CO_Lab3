@@ -2,12 +2,12 @@
 // a pipelined RISC-V microarchitecture (RV32I)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-//// [*] In simple_cpu.v you should connect the correct wires to the correct ports
-////     - All modules are given so there is no need to make new modules
-////       (it does not mean you do not need to instantiate new modules)
-////     - However, you may have to fix or add in / out ports for some modules
-////     - In addition, you are still free to instantiate simple modules like multiplexers,
-////       adders, etc.
+// [*] In simple_cpu.v, connect the correct wires to the correct ports
+//     - All modules are given so there is no need to make new modules
+//       (it does not mean you do not need to instantiate new modules)
+//     - However, you may have to fix or add in / out ports for some modules
+//     - In addition, you are still free to instantiate simple modules like
+//       multiplexers, adders, etc.
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 module simple_cpu
@@ -199,7 +199,6 @@ assign id_rd  = id_instruction[11 : 7];
 
 /* m_hazard: hazard detection unit */
 
-/*
 hazard m_hazard(
   // TODO: implement hazard detection unit & do wiring
   .id_rs1       (id_rs1),
@@ -217,7 +216,7 @@ hazard m_hazard(
   .if_flush     (if_flush),
   .id_flush     (id_flush),
   .do_stall     (stall)
-);*/
+);
 
 /* m_control: control unit */
 

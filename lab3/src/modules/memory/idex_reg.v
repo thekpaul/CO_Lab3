@@ -72,26 +72,7 @@ module idex_reg #(
 // TODO: Implement ID/EX pipeline register module
 
 always @(posedge clk) begin
-  if (id_flush == 1'b0) begin
-    ex_PC        <= id_PC;
-    ex_pc_plus_4 <= id_pc_plus_4;
-    ex_jump      <= id_jump;
-    ex_branch    <= id_branch;
-    ex_aluop     <= id_aluop;
-    ex_alusrc    <= id_alusrc;
-    ex_memread   <= id_memread;
-    ex_memwrite  <= id_memwrite;
-    ex_memtoreg  <= id_memtoreg;
-    ex_regwrite  <= id_regwrite;
-    ex_sextimm   <= id_sextimm;
-    ex_funct7    <= id_funct7;
-    ex_funct3    <= id_funct3;
-    ex_readdata1 <= id_readdata1;
-    ex_readdata2 <= id_readdata2;
-    ex_rs1       <= id_rs1;
-    ex_rs2       <= id_rs2;
-    ex_rd        <= id_rd;
-  end else begin
+  if (id_flush == 1'b1) begin
     ex_PC        <= 32'hXXXX_XXXX;
     ex_pc_plus_4 <= 32'hXXXX_XXXX;
     ex_jump      <= 2'bXX;
@@ -110,6 +91,25 @@ always @(posedge clk) begin
     ex_rs1       <= 5'bXXXXX;
     ex_rs2       <= 5'bXXXXX;
     ex_rd        <= 5'bXXXXX;
+  end else begin
+    ex_PC        <= id_PC;
+    ex_pc_plus_4 <= id_pc_plus_4;
+    ex_jump      <= id_jump;
+    ex_branch    <= id_branch;
+    ex_aluop     <= id_aluop;
+    ex_alusrc    <= id_alusrc;
+    ex_memread   <= id_memread;
+    ex_memwrite  <= id_memwrite;
+    ex_memtoreg  <= id_memtoreg;
+    ex_regwrite  <= id_regwrite;
+    ex_sextimm   <= id_sextimm;
+    ex_funct7    <= id_funct7;
+    ex_funct3    <= id_funct3;
+    ex_readdata1 <= id_readdata1;
+    ex_readdata2 <= id_readdata2;
+    ex_rs1       <= id_rs1;
+    ex_rs2       <= id_rs2;
+    ex_rd        <= id_rd;
   end
 end
 

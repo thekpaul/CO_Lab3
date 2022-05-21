@@ -28,14 +28,14 @@ module ifid_reg #(
 // TODO: Implement IF/ID pipeline register module
 
 always @(posedge clk) begin
-  if (if_flush == 1'b0) begin
-    id_PC          <= if_PC;
-    id_pc_plus_4   <= if_pc_plus_4;
-    id_instruction <= if_instruction;
-  end else begin
+  if (if_flush == 1'b1) begin
     id_PC          <= 32'hXXXX_XXXX;
     id_pc_plus_4   <= 32'hXXXX_XXXX;
     id_instruction <= 32'hXXXX_XXXX;
+  end else begin
+    id_PC          <= if_PC;
+    id_pc_plus_4   <= if_pc_plus_4;
+    id_instruction <= if_instruction;
   end
 end
 
