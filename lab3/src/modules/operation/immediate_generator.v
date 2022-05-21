@@ -36,10 +36,10 @@ always @(*) begin
     7'b110_0111: sextimm = $signed({instruction[31:20]});
 
     // LUI -> [31:12]
-    7'b011_0111: sextimm = $signed({instruction[31:12]});
+    7'b011_0111: sextimm = $signed({instruction[31:12], 12'h0});
 
     // AUIPC -> [31:12]
-    7'b001_0111: sextimm = $signed({instruction[31:12]});
+    7'b001_0111: sextimm = $signed({instruction[31:12], 12'h0});
 
 
     //////////////////////////////////////////////////////////////////////////
