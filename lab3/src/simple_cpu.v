@@ -19,6 +19,8 @@ module simple_cpu
 ///////////////////////////////////////////////////////////////////////////////
 // TODO:  Declare all wires / registers that are needed
 
+wire stall; // Super-stage Stall Signal
+
 ///////////////////////////////////////////
 //        IF WIRES                       //
 ///////////////////////////////////////////
@@ -153,7 +155,7 @@ adder m_pc_plus_4_adder(
 
 always @(posedge clk) begin
   if (rstn == 1'b0) PC <= 32'h00000000;
-  else PC <= ex_pc_target;
+  else if (stall != 1'b1) PC <= ex_pc_target;
 end
 
 assign if_PC = PC;
@@ -170,6 +172,7 @@ ifid_reg m_ifid_reg(
   // TODO: Add flush or stall signal if it is needed
   .clk            (clk),
   .if_flush       (if_flush),
+  .do_stall       (stall),
 
   .if_PC          (if_PC),
   .if_pc_plus_4   (if_pc_plus_4),
@@ -260,6 +263,7 @@ idex_reg m_idex_reg(
   // TODO: Add flush or stall signal if it is needed
   .clk          (clk),
   .id_flush     (id_flush),
+  .do_stall     (stall),
 
   .id_PC        (id_PC),
   .id_pc_plus_4 (id_pc_plus_4),

@@ -12,6 +12,7 @@ module idex_reg #(
   //////////////////////////////////////
   input clk,
   input id_flush,
+  input do_stall,
 
   input [DATA_WIDTH - 1 : 0] id_PC,
   input [DATA_WIDTH - 1 : 0] id_pc_plus_4,
@@ -72,7 +73,7 @@ module idex_reg #(
 // TODO: Implement ID/EX pipeline register module
 
 always @(posedge clk) begin
-  if (id_flush == 1'b1) begin
+  if ((id_flush == 1'b1) || (do_stall == 1'b1)) begin
     ex_PC        <= 32'hXXXX_XXXX;
     ex_pc_plus_4 <= 32'hXXXX_XXXX;
     ex_jump      <= 2'bXX;

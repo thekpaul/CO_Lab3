@@ -68,12 +68,14 @@ always @(*) begin
   endcase
 
   // STALL
-  if ( use_rs[1] && ( (id_rs1 ==  ex_rd) &&  ex_regwrite ||
-                      (id_rs1 == mem_rd) && mem_regwrite ||
-                      (id_rs1 ==  wb_rd) &&  wb_regwrite ) ||
-       use_rs[2] && ( (id_rs2 ==  ex_rd) &&  ex_regwrite ||
-                      (id_rs2 == mem_rd) && mem_regwrite ||
-                      (id_rs2 ==  wb_rd) &&  wb_regwrite ) ) stall = 1'b1;
+  if (use_rs[1] && (id_rs1 != 5'b00000) && (^id_rs1 === 1'bX) &&
+        ( (id_rs1 ==  ex_rd) &&  ex_regwrite ||
+          (id_rs1 == mem_rd) && mem_regwrite ||
+          (id_rs1 ==  wb_rd) &&  wb_regwrite ) ||
+      use_rs[2] && (id_rs2 != 5'b00000) && (^id_rs2 === 1'bX) &&
+        ( (id_rs2 ==  ex_rd) &&  ex_regwrite ||
+          (id_rs2 == mem_rd) && mem_regwrite ||
+          (id_rs2 ==  wb_rd) &&  wb_regwrite ) ) stall = 1'b1;
 end
 
 assign if_flush = flush;

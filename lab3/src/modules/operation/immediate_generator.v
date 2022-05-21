@@ -32,13 +32,13 @@ always @(*) begin
     // J -> [31] + [19:12] + [20] + [30:21] + 0
     7'b110_1111: sextimm = $signed({instruction[31], instruction[19:12], instruction[20], instruction[30:21], 1'b0});
 
-    // JALR
+    // JALR -> [31:20]
     7'b110_0111: sextimm = $signed({instruction[31:20]});
 
-    // LUI
+    // LUI -> [31:12]
     7'b011_0111: sextimm = $signed({instruction[31:12]});
 
-    // AUIPC
+    // AUIPC -> [31:12]
     7'b001_0111: sextimm = $signed({instruction[31:12]});
 
 

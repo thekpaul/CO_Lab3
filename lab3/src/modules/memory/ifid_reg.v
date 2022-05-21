@@ -12,6 +12,7 @@ module ifid_reg #(
   //////////////////////////////////////
   input clk,
   input if_flush,
+  input do_stall,
 
   input [DATA_WIDTH - 1 : 0] if_PC,
   input [DATA_WIDTH - 1 : 0] if_pc_plus_4,
@@ -33,9 +34,11 @@ always @(posedge clk) begin
     id_pc_plus_4   <= 32'hXXXX_XXXX;
     id_instruction <= 32'hXXXX_XXXX;
   end else begin
-    id_PC          <= if_PC;
-    id_pc_plus_4   <= if_pc_plus_4;
-    id_instruction <= if_instruction;
+    if (do_stall != 1'b1) begin
+      id_PC          <= if_PC;
+      id_pc_plus_4   <= if_pc_plus_4;
+      id_instruction <= if_instruction;
+    end
   end
 end
 
