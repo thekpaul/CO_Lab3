@@ -7,7 +7,7 @@ wire [31:0] inst;
 
 // find the number of instructions in inst.mem
 // NOTE: each line in inst.mem must be 32-bit PC + \n
-//       otherwise, simulation can be wrong 
+//       otherwise, simulation can be wrong
 // NOTE: <end> of the inst.mem consists of NOPs & JAL to NOPs
 integer fd, position, n_instructions;
 reg [31:0] LAST_PC;
@@ -35,11 +35,11 @@ initial begin
   $display($time, " Instruction Memory ");
   $monitor($time, " [PC] pc : %d", my_cpu.PC);
   #60 rstn = 1'b1;
-  //#4000; 
-  wait (my_cpu.PC == LAST_PC);  
+  // #4000;
+  wait (my_cpu.PC == LAST_PC);
   rstn = 1'b0;
   $display($time, " ** End Simulation **");
-  
+
   ////////////////////////////////////////////////////////
   // [WARNING] : DO NOT ERASE when using "test.py"
   ////////////////////////////////////////////////////////

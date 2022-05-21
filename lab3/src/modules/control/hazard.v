@@ -22,7 +22,6 @@ module hazard #(
 
   output if_flush,
   output id_flush,
-  output ex_flush,
   output do_stall
 );
 
@@ -78,7 +77,6 @@ end
 
 assign if_flush = flush;
 assign id_flush = flush;
-assign ex_flush = flush;
 assign do_stall = stall;
 
 endmodule

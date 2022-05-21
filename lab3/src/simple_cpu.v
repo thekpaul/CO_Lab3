@@ -66,8 +66,6 @@ wire [4 : 0] id_rd;
 //        EX WIRES                       //
 ///////////////////////////////////////////
 
-wire ex_flush;
-
 wire [DATA_WIDTH - 1 : 0] ex_PC;
 
 wire ex_branch;
@@ -172,7 +170,6 @@ ifid_reg m_ifid_reg(
   // TODO: Add flush or stall signal if it is needed
   .clk            (clk),
   .if_flush       (if_flush),
-  .target_pc      (ex_pc_target),
 
   .if_PC          (if_PC),
   .if_pc_plus_4   (if_pc_plus_4),
@@ -218,7 +215,6 @@ hazard m_hazard(
 
   .if_flush     (if_flush),
   .id_flush     (id_flush),
-  .ex_flush     (ex_flush),
   .do_stall     (stall)
 );
 
@@ -406,7 +402,6 @@ assign ex_writedata = fwd_data2;
 exmem_reg m_exmem_reg(
   // TODO: Add flush or stall signal if it is needed
   .clk            (clk),
-  .ex_flush       (ex_flush),
 
   .ex_pc_plus_4   (ex_pc_plus_4),
   .ex_jump        (ex_jump),
