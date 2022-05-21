@@ -199,6 +199,7 @@ assign id_rd  = id_instruction[11 : 7];
 
 /* m_hazard: hazard detection unit */
 
+/*
 hazard m_hazard(
   // TODO: implement hazard detection unit & do wiring
   .id_rs1       (id_rs1),
@@ -216,7 +217,7 @@ hazard m_hazard(
   .if_flush     (if_flush),
   .id_flush     (id_flush),
   .do_stall     (stall)
-);
+);*/
 
 /* m_control: control unit */
 

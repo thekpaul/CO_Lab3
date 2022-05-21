@@ -72,26 +72,44 @@ module idex_reg #(
 // TODO: Implement ID/EX pipeline register module
 
 always @(posedge clk) begin
-
-  if (id_flush == 1'b1) begin
-    ex_PC        <= (~id_flush) ? id_PC        : 32'hXXXX_XXXX;
-    ex_pc_plus_4 <= (~id_flush) ? id_pc_plus_4 : 32'hXXXX_XXXX;
-    ex_jump      <= (~id_flush) ? id_jump      : 2'bXX;
-    ex_branch    <= (~id_flush) ? id_branch    : 1'bX;
-    ex_aluop     <= (~id_flush) ? id_aluop     : 2'bXX;
-    ex_alusrc    <= (~id_flush) ? id_alusrc    : 1'bX;
-    ex_memread   <= (~id_flush) ? id_memread   : 1'bX;
-    ex_memwrite  <= (~id_flush) ? id_memwrite  : 1'bX;
-    ex_memtoreg  <= (~id_flush) ? id_memtoreg  : 1'bX;
-    ex_regwrite  <= (~id_flush) ? id_regwrite  : 1'bX;
-    ex_sextimm   <= (~id_flush) ? id_sextimm   : 32'hXXXX_XXXX;
-    ex_funct7    <= (~id_flush) ? id_funct7    : 7'bXXX_XXXX;
-    ex_funct3    <= (~id_flush) ? id_funct3    : 3'bXXX;
-    ex_readdata1 <= (~id_flush) ? id_readdata1 : 32'hXXXX_XXXX;
-    ex_readdata2 <= (~id_flush) ? id_readdata2 : 32'hXXXX_XXXX;
-    ex_rs1       <= (~id_flush) ? id_rs1       : 5'bXXXXX;
-    ex_rs2       <= (~id_flush) ? id_rs2       : 5'bXXXXX;
-    ex_rd        <= (~id_flush) ? id_rd        : 5'bXXXXX;
+  if (id_flush == 1'b0) begin
+    ex_PC        <= id_PC;
+    ex_pc_plus_4 <= id_pc_plus_4;
+    ex_jump      <= id_jump;
+    ex_branch    <= id_branch;
+    ex_aluop     <= id_aluop;
+    ex_alusrc    <= id_alusrc;
+    ex_memread   <= id_memread;
+    ex_memwrite  <= id_memwrite;
+    ex_memtoreg  <= id_memtoreg;
+    ex_regwrite  <= id_regwrite;
+    ex_sextimm   <= id_sextimm;
+    ex_funct7    <= id_funct7;
+    ex_funct3    <= id_funct3;
+    ex_readdata1 <= id_readdata1;
+    ex_readdata2 <= id_readdata2;
+    ex_rs1       <= id_rs1;
+    ex_rs2       <= id_rs2;
+    ex_rd        <= id_rd;
+  end else begin
+    ex_PC        <= 32'hXXXX_XXXX;
+    ex_pc_plus_4 <= 32'hXXXX_XXXX;
+    ex_jump      <= 2'bXX;
+    ex_branch    <= 1'bX;
+    ex_aluop     <= 2'bXX;
+    ex_alusrc    <= 1'bX;
+    ex_memread   <= 1'bX;
+    ex_memwrite  <= 1'bX;
+    ex_memtoreg  <= 1'bX;
+    ex_regwrite  <= 1'bX;
+    ex_sextimm   <= 32'hXXXX_XXXX;
+    ex_funct7    <= 7'bXXX_XXXX;
+    ex_funct3    <= 3'bXXX;
+    ex_readdata1 <= 32'hXXXX_XXXX;
+    ex_readdata2 <= 32'hXXXX_XXXX;
+    ex_rs1       <= 5'bXXXXX;
+    ex_rs2       <= 5'bXXXXX;
+    ex_rd        <= 5'bXXXXX;
   end
 end
 
