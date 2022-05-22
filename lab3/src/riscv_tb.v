@@ -35,7 +35,7 @@ initial begin
   $display($time, " Instruction Memory ");
   $monitor($time, " [PC] pc : %d", my_cpu.PC);
   #60 rstn = 1'b1;
-  // #4000;
+  // #400000;
   wait (my_cpu.PC == LAST_PC);
   rstn = 1'b0;
   $display($time, " ** End Simulation **");
