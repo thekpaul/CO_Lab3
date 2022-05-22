@@ -1,3 +1,4 @@
+
 // hazard.v
 
 // This module determines if pipeline stalls or flushing are required
@@ -20,9 +21,8 @@ module hazard #(
   input [DATA_WIDTH - 1 : 0] pc_plus_4,
   input [DATA_WIDTH - 1 : 0] pc_target,
 
-  output if_flush,
-  output id_flush,
-  output do_stall
+  output flush,
+  output stall
 );
 
 /* Algorithm Flow
@@ -43,15 +43,15 @@ module hazard #(
 *
 */
 
-reg flush = 1'b0;   // Flush Signal
-reg stall = 1'b0;   // Stall Signal
+reg reg_flush = 1'b0;
+reg reg_stall = 1'b0;
 reg [2 : 0] use_rs; // use_rs1 = use_rs[1], use_rs2 = use_rs[2]
 
 always @(*) begin
 
   // FLUSH
-  if ((^pc_plus_4 === 1'bX) && (^pc_target === 1'bX) &&
-      (pc_plus_4 != pc_target)) flush = 1'b1;
+  if (pc_plus_4 != pc_target) reg_flush <= 1'b1;
+  else reg_flush <= 1'b0;
 
   // USAGE Determination
   casex (opcode)
@@ -68,18 +68,18 @@ always @(*) begin
   endcase
 
   // STALL
-  if (use_rs[1] && (id_rs1 != 5'b00000) && (^id_rs1 === 1'bX) &&
-        ( (id_rs1 ==  ex_rd) &&  ex_regwrite ||
-          (id_rs1 == mem_rd) && mem_regwrite ||
-          (id_rs1 ==  wb_rd) &&  wb_regwrite ) ||
-      use_rs[2] && (id_rs2 != 5'b00000) && (^id_rs2 === 1'bX) &&
-        ( (id_rs2 ==  ex_rd) &&  ex_regwrite ||
-          (id_rs2 == mem_rd) && mem_regwrite ||
-          (id_rs2 ==  wb_rd) &&  wb_regwrite ) ) stall = 1'b1;
+  if (use_rs[1] && (id_rs1 != 5'b00000) &&
+        ( (id_rs1 ==  ex_rd) &&  ex_regwrite == 1'b1 ||
+          (id_rs1 == mem_rd) && mem_regwrite == 1'b1 ||
+          (id_rs1 ==  wb_rd) &&  wb_regwrite == 1'b1 ) ||
+      use_rs[2] && (id_rs2 != 5'b00000) &&
+        ( (id_rs2 ==  ex_rd) &&  ex_regwrite == 1'b1 ||
+          (id_rs2 == mem_rd) && mem_regwrite == 1'b1 ||
+          (id_rs2 ==  wb_rd) &&  wb_regwrite == 1'b1 ) ) reg_stall <= 1'b1;
+  else reg_stall <= 1'b0;
 end
 
-assign if_flush = flush;
-assign id_flush = flush;
-assign do_stall = stall;
+assign flush = reg_flush;
+assign stall = reg_stall;
 
 endmodule

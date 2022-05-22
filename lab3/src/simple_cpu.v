@@ -1,3 +1,4 @@
+
 // simple_cpu.v
 // a pipelined RISC-V microarchitecture (RV32I)
 
@@ -19,13 +20,12 @@ module simple_cpu
 ///////////////////////////////////////////////////////////////////////////////
 // TODO:  Declare all wires / registers that are needed
 
+wire flush; // Super-stage Flush Signal
 wire stall; // Super-stage Stall Signal
 
 ///////////////////////////////////////////
 //        IF WIRES                       //
 ///////////////////////////////////////////
-
-wire if_flush;
 
 wire [DATA_WIDTH - 1 : 0] if_PC;
 wire [DATA_WIDTH - 1 : 0] if_pc_plus_4;
@@ -34,8 +34,6 @@ wire [DATA_WIDTH - 1 : 0] if_instruction;
 ///////////////////////////////////////////
 //        ID WIRES                       //
 ///////////////////////////////////////////
-
-wire id_flush;
 
 wire [DATA_WIDTH - 1 : 0] id_PC;
 wire [DATA_WIDTH - 1 : 0] id_pc_plus_4;
@@ -155,9 +153,19 @@ adder m_pc_plus_4_adder(
   .result (if_pc_plus_4)
 );
 
+wire [DATA_WIDTH - 1 : 0] next_pc;
+
+mux_4x1 next({flush, stall},
+  if_pc_plus_4, // 00 => Default Incrementation
+  PC,           // 01 => Stall
+  ex_pc_target, // 10
+  ex_pc_target, // 11 => Next PC Changed => When Flush?
+  next_pc
+);
+
 always @(posedge clk) begin
   if (rstn == 1'b0) PC <= 32'h00000000;
-  else if (stall != 1'b1) PC <= ex_pc_target;
+  else if (stall != 1'b1) PC <= next_pc;
 end
 
 assign if_PC = PC;
@@ -173,7 +181,7 @@ instruction_memory m_instruction_memory(
 ifid_reg m_ifid_reg(
   // TODO: Add flush or stall signal if it is needed
   .clk            (clk),
-  .if_flush       (if_flush),
+  .if_flush       (flush),
   .do_stall       (stall),
 
   .if_PC          (if_PC),
@@ -218,9 +226,8 @@ hazard m_hazard(
   .pc_plus_4    (ex_pc_plus_4),
   .pc_target    (ex_pc_target),
 
-  .if_flush     (if_flush),
-  .id_flush     (id_flush),
-  .do_stall     (stall)
+  .flush        (flush),
+  .stall        (stall)
 );
 
 /* m_control: control unit */
@@ -265,7 +272,7 @@ register_file m_register_file(
 idex_reg m_idex_reg(
   // TODO: Add flush or stall signal if it is needed
   .clk          (clk),
-  .id_flush     (id_flush),
+  .id_flush     (flush),
   .do_stall     (stall),
 
   .id_PC        (id_PC),
@@ -402,12 +409,10 @@ branch_control m_branch_control(
 
 mux_4x1 muxj(ex_jump,          // Jump[1 : 0] => 00 (X) / 01 (JAL) / 11 (JALR)
   (ex_branch == 1'b0 || ex_taken != ex_funct3[0])
-    ? ex_pc_plus_4 : ex_branch_dest,
-                               // 00 => No Jump, Test Branch
-  (ex_PC + ex_sextimm),        // 01 => JAL, Add `imm` to Current PC
-  ex_pc_plus_4,                // 10 => Not Possible Option,
-                               // Use as Default for error cases
-  (ex_readdata1 + ex_sextimm), // 11 => JALR, Add `imm` to `rs1` TODO
+    ? ex_pc_plus_4 : ex_branch_dest, // 00 => No Jump, Test Branch
+  (ex_PC + ex_sextimm),              // 01 => JAL, Add `imm` to Current PC
+  ex_pc_plus_4,                      // 10 => Default for error cases
+  (ex_readdata1 + ex_sextimm),       // 11 => JALR, Add `imm` to `rs1` TODO
   ex_pc_target
 );
 
