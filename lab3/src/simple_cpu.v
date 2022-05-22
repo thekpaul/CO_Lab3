@@ -155,16 +155,17 @@ adder m_pc_plus_4_adder(
 
 wire [DATA_WIDTH - 1 : 0] next_pc;
 
-mux_3x1 next({flush, stall},
+mux_4x1 next({flush, stall},
   if_pc_plus_4, // 00 => Default Incrementation
   PC,           // 01 => Stall
   ex_pc_target, // 10 => Next PC Changed => Detect by Flush
+  ex_pc_target, // 11 => Next PC Changed => Flush, Ignore Stall
   next_pc
 );
 
 always @(posedge clk) begin
   if (rstn == 1'b0) PC <= 32'h00000000;
-  else if (stall != 1'b1) PC <= next_pc;
+  else PC <= next_pc;
 end
 
 assign if_PC = PC;

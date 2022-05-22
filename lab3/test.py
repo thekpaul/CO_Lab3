@@ -18,12 +18,12 @@ unit_tests = [
         ]
 
 benchmarks = [
-        # [ 'bst_array',   'data/benchmarks/bst_array/inst.mem',   'data/benchmarks/bst_array/reg-out.mem' ],
-        # [ 'fibo',        'data/benchmarks/fibo/inst.mem',        'data/benchmarks/fibo/reg-out.mem' ],
-        # [ 'matmul',      'data/benchmarks/matmul/inst.mem',      'data/benchmarks/matmul/reg-out.mem' ],
-        # [ 'prime_fact',  'data/benchmarks/prime_fact/inst.mem',  'data/benchmarks/prime_fact/reg-out.mem' ],
+          [ 'bst_array',   'data/benchmarks/bst_array/inst.mem',   'data/benchmarks/bst_array/reg-out.mem' ],
+          [ 'fibo',        'data/benchmarks/fibo/inst.mem',        'data/benchmarks/fibo/reg-out.mem' ],
+          [ 'matmul',      'data/benchmarks/matmul/inst.mem',      'data/benchmarks/matmul/reg-out.mem' ],
+          [ 'prime_fact',  'data/benchmarks/prime_fact/inst.mem',  'data/benchmarks/prime_fact/reg-out.mem' ],
           [ 'quicksort',   'data/benchmarks/quicksort/inst.mem',   'data/benchmarks/quicksort/reg-out.mem' ],
-        # [ 'spmv',        'data/benchmarks/spmv/inst.mem',        'data/benchmarks/spmv/reg-out.mem' ],
+          [ 'spmv',        'data/benchmarks/spmv/inst.mem',        'data/benchmarks/spmv/reg-out.mem' ],
         ]
 
 hw_counters = [
