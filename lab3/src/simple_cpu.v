@@ -505,7 +505,12 @@ memwb_reg m_memwb_reg(
 
 // TODO: Implement Write-Back on Top Module
 
-assign write_data = wb_jump[0] ? // Jump[0] => 0 (X) / 1 (JAL / JALR => O)
-  wb_pc_plus_4 : (wb_memtoreg ? wb_readdata : wb_alu_result);
+mux_4x1 muxw({wb_jump[0], {wb_memtoreg}},
+  wb_alu_result, // Jump 0, MemToReg 0 => Write memory data
+  wb_readdata,   // Jump 0, MemToReg 1 => Write ALU result
+  wb_pc_plus_4,  // Jump 1, MemToReg X => Write Jump Previous PC + 4
+  wb_pc_plus_4,  // Jump 1, MemToReg X => Write Jump Previous PC + 4
+  write_data
+);
 
 endmodule
