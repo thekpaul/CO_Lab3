@@ -225,9 +225,9 @@ hazard m_hazard(
   .ex_rd        (ex_rd),
   .mem_rd       (mem_rd),
   .wb_rd        (wb_rd),
-  .ex_regwrite  (ex_regwrite),
-  .mem_regwrite (mem_regwrite),
-  .wb_regwrite  (wb_regwrite),
+  .ex_memread   (ex_memread),
+  .mem_memread  (mem_memread),
+  .wb_memread   (wb_memread),
   .pc_plus_4    (ex_pc_plus_4),
   .pc_target    (ex_pc_target),
 
