@@ -513,4 +513,13 @@ mux_4x1 muxw({wb_jump[0], {wb_memtoreg}},
   write_data
 );
 
+wire [31:0] CORE_CYCLE;
+hardware_counter m_core_cycle(
+  .clk(clk),
+  .rstn(rstn),
+  .cond(1'b1),
+
+  .counter(CORE_CYCLE)
+);
+
 endmodule
