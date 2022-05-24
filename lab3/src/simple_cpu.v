@@ -30,6 +30,7 @@ wire stall; // Super-stage Stall Signal
 wire [DATA_WIDTH - 1 : 0] if_PC;
 wire [DATA_WIDTH - 1 : 0] if_pc_plus_4;
 wire [DATA_WIDTH - 1 : 0] if_instruction;
+wire [6 : 0] if_opcode;
 
 ///////////////////////////////////////////
 //        ID WIRES                       //
@@ -55,6 +56,7 @@ wire id_memtoreg;
 wire id_regwrite;
 
 wire [DATA_WIDTH - 1 : 0] id_sextimm;
+wire [6 : 0] id_opcode;
 wire [6 : 0] id_funct7;
 wire [2 : 0] id_funct3;
 wire [DATA_WIDTH - 1 : 0] id_readdata1;
@@ -177,6 +179,9 @@ instruction_memory m_instruction_memory(
   .instruction (if_instruction)
 );
 
+/* Prerequisites for Branch Hardware */
+assign if_opcode = if_instruction[6 : 0];
+
 /* forward to IF/ID stage registers */
 ifid_reg m_ifid_reg(
   // TODO: Add flush or stall signal if it is needed
@@ -187,10 +192,12 @@ ifid_reg m_ifid_reg(
   .if_PC          (if_PC),
   .if_pc_plus_4   (if_pc_plus_4),
   .if_instruction (if_instruction),
+  .if_opcode      (if_opcode),
 
   .id_PC          (id_PC),
   .id_pc_plus_4   (id_pc_plus_4),
-  .id_instruction (id_instruction)
+  .id_instruction (id_instruction),
+  .id_opcode      (id_opcode)
 );
 
 
@@ -199,8 +206,6 @@ ifid_reg m_ifid_reg(
 ///////////////////////////////////////////////////////////////////////////////
 
 // instruction fields
-wire [6 : 0] opcode = id_instruction[6 : 0];
-
 assign id_funct7 = id_instruction[31 : 25];
 assign id_funct3 = id_instruction[14 : 12];
 
@@ -216,7 +221,7 @@ hazard m_hazard(
   // TODO: implement hazard detection unit & do wiring
   .id_rs1       (id_rs1),
   .id_rs2       (id_rs2),
-  .opcode       (opcode),
+  .opcode       (id_opcode),
   .ex_rd        (ex_rd),
   .mem_rd       (mem_rd),
   .wb_rd        (wb_rd),
@@ -233,7 +238,7 @@ hazard m_hazard(
 /* m_control: control unit */
 
 control m_control(
-  .opcode     (opcode),
+  .opcode     (id_opcode),
 
   .ui         (id_ui),
   .jump       (id_jump),
