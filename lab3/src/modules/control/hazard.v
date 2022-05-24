@@ -51,34 +51,32 @@ always @(*) begin
 
   // FLUSH
   if (pc_plus_4 != pc_target) reg_flush <= 1'b1;
-  else begin
-    reg_flush <= 1'b0;
+  else reg_flush <= 1'b0;
 
-    // USAGE Determination
-    casex (opcode)
-      7'b011_0011: use_rs <= 3'b110; // R
-      7'b001_0011: use_rs <= 3'b010; // I
-      7'b000_0011: use_rs <= 3'b010; // L
-      7'b010_0011: use_rs <= 3'b110; // S
-      7'b110_0011: use_rs <= 3'b110; // B
-      7'b110_1111: use_rs <= 3'b000; // J
-      7'b110_0111: use_rs <= 3'b010; // JALR
-      7'b011_0111: use_rs <= 3'b000; // LUI
-      7'b001_0111: use_rs <= 3'b000; // AUIPC
-      default:     use_rs <= 3'bXXX; // ERROR
-    endcase
+  // USAGE Determination
+  casex (opcode)
+    7'b011_0011: use_rs <= 3'b110; // R
+    7'b001_0011: use_rs <= 3'b010; // I
+    7'b000_0011: use_rs <= 3'b010; // L
+    7'b010_0011: use_rs <= 3'b110; // S
+    7'b110_0011: use_rs <= 3'b110; // B
+    7'b110_1111: use_rs <= 3'b000; // J
+    7'b110_0111: use_rs <= 3'b010; // JALR
+    7'b011_0111: use_rs <= 3'b000; // LUI
+    7'b001_0111: use_rs <= 3'b000; // AUIPC
+    default:     use_rs <= 3'bXXX; // ERROR
+  endcase
 
-    // STALL
-    if ( (use_rs[1] == 1'b1 && (id_rs1 != 5'b00000) &&
-          ( (id_rs1 ==  ex_rd) &&  ex_regwrite == 1'b1 ||
-            (id_rs1 == mem_rd) && mem_regwrite == 1'b1 ||
-            (id_rs1 ==  wb_rd) &&  wb_regwrite == 1'b1 ) ) ||
-         (use_rs[2] == 1'b1 && (id_rs2 != 5'b00000) &&
-          ( (id_rs2 ==  ex_rd) &&  ex_regwrite == 1'b1 ||
-            (id_rs2 == mem_rd) && mem_regwrite == 1'b1 ||
-            (id_rs2 ==  wb_rd) &&  wb_regwrite == 1'b1 ) ) ) reg_stall <= 1'b1;
-    else reg_stall <= 1'b0;
-  end
+  // STALL
+  if ( (use_rs[1] == 1'b1 && (id_rs1 != 5'b00000) &&
+        ( (id_rs1 ==  ex_rd) &&  ex_regwrite == 1'b1 ||
+          (id_rs1 == mem_rd) && mem_regwrite == 1'b1 ||
+          (id_rs1 ==  wb_rd) &&  wb_regwrite == 1'b1 ) ) ||
+       (use_rs[2] == 1'b1 && (id_rs2 != 5'b00000) &&
+        ( (id_rs2 ==  ex_rd) &&  ex_regwrite == 1'b1 ||
+          (id_rs2 == mem_rd) && mem_regwrite == 1'b1 ||
+          (id_rs2 ==  wb_rd) &&  wb_regwrite == 1'b1 ) ) ) reg_stall <= 1'b1;
+  else reg_stall <= 1'b0;
 end
 
 assign flush = reg_flush;
