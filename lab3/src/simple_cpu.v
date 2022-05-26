@@ -445,13 +445,20 @@ alu m_alu(
 );
 
 /* m_branch_target_adder: PC + imm for branch address */
-wire [DATA_WIDTH - 1 : 0] ex_branch_dest;
+wire [DATA_WIDTH - 1 : 0] ex_move_dest;
+wire [DATA_WIDTH - 1 : 0] ex_recipe;
+
+mux_2x1 jalr(ex_jump[1],
+  ex_PC,        // 0 => Branch or JAL, add PC with sextimm
+  ex_readdata1, // 1 => JALR, add rs1 with sextimm
+  ex_recipe
+);
 
 adder m_branch_target_adder(
-  .in_a   (ex_PC),
+  .in_a   (ex_recipe),
   .in_b   (ex_sextimm),
 
-  .result (ex_branch_dest)
+  .result (ex_move_dest) // = (ex_PC || ex_readdata) + ex_sextimm => next_PC
 );
 
 /* m_branch_control: checks T/NT */
@@ -465,35 +472,11 @@ branch_control m_branch_control(
   .taken  (ex_taken)
 );
 
-wire [DATA_WIDTH - 1 : 0] ex_PC_no_jump;
-
-mux_2x1 muxb(ex_taken,
-  ex_pc_plus_4,   // 0 => Not Branched, PC + 4 is fed
-  ex_branch_dest, // 1 => Not Branched, Branch Target is fed
-  ex_PC_no_jump
-);
-
-mux_4x1 muxj(ex_jump,          // Jump[1 : 0] => 00 (X) / 01 (JAL) / 11 (JALR)
-  ex_PC_no_jump, // 00 => No Jump, Test Branch
-  (ex_PC + ex_sextimm),              // 01 => JAL, Add `imm` to Current PC
-  ex_pc_plus_4,                      // 10 => Default for error cases
-  (ex_readdata1 + ex_sextimm),       // 11 => JALR, Add `imm` to `rs1` TODO
+mux_2x1 dest(ex_taken || ex_jump[0],
+  ex_pc_plus_4, // 0 => Not Branching, PC + 4 is fed
+  ex_move_dest, // 1 => Branch or Jump, Branch Target or Jump Address is fed
   ex_pc_target
 );
-
-// wire [DATA_WIDTH - 1 : 0] u_result;
-//
-// mux_2x1 muxu(opcode[5],
-//   ex_PC + ex_sextimm, // 0`0`10111 => AUIPC
-//   ex_sextimm,         // 0`1`10111 => LUI
-//   u_result
-// );
-//
-// mux_2x1 muxx(
-//   ex_alu_result, // => NOT U-type Inst. -> Pass ALU_RESULT
-//   u_result,      // =>     U-type Inst. -> Pass U_RESULT
-//   ex_alu_result
-// );
 
 assign ex_writedata = fwd_data2;
 
