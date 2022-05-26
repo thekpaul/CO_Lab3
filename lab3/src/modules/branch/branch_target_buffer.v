@@ -12,15 +12,15 @@ module branch_target_buffer #(
   input rstn,
 
   // update interface
-  input update,                              // when 'update' is true, we update the BTB entry
-  input [DATA_WIDTH-1:0] resolved_pc,
-  input [DATA_WIDTH-1:0] resolved_pc_target,
+  input update, // when 'update' is true, we update the BTB entry
+  input [DATA_WIDTH - 1 : 0] resolved_pc,
+  input [DATA_WIDTH - 1 : 0] resolved_pc_target,
 
   // access interface
-  input [DATA_WIDTH-1:0] pc,
+  input [DATA_WIDTH - 1 : 0] pc,
 
   output reg hit,
-  output reg [DATA_WIDTH-1:0] target_address
+  output reg [DATA_WIDTH - 1 : 0] target_address
 );
 
 // TODO: Implement BTB

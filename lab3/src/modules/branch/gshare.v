@@ -16,10 +16,10 @@ module gshare #(
   // update interface
   input update,
   input actually_taken,
-  input [DATA_WIDTH-1:0] resolved_pc,
+  input [DATA_WIDTH - 1 : 0] resolved_pc,
 
   // access interface
-  input [DATA_WIDTH-1:0] pc,
+  input [DATA_WIDTH - 1 : 0] pc,
 
   output reg pred
 );

@@ -16,15 +16,17 @@ module branch_hardware #(
   input update_predictor,
   input update_btb,
   input actually_taken,
-  input [DATA_WIDTH-1:0] resolved_pc,
-  input [DATA_WIDTH-1:0] resolved_pc_target,  // actual target address when the branch is resolved.
+  input [DATA_WIDTH - 1 : 0] resolved_pc,
+  input [DATA_WIDTH - 1 : 0] resolved_pc_target,
+    // actual target address when the branch is resolved.
 
   // access interface
-  input [DATA_WIDTH-1:0] pc,
+  input [DATA_WIDTH - 1 : 0] pc,
 
   output reg hit,          // btb hit or not
   output reg pred,         // predicted taken or not
-  output reg [DATA_WIDTH-1:0] branch_target  // branch target address for a hit
+  output reg [DATA_WIDTH - 1 : 0] branch_target
+    // branch target address for a hit
 );
 
 // TODO: Instantiate a branch predictor and a BTB.

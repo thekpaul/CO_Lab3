@@ -2,14 +2,14 @@
 // simple_cpu.v
 // a pipelined RISC-V microarchitecture (RV32I)
 
-///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 // [*] In simple_cpu.v, connect the correct wires to the correct ports
 //     - All modules are given so there is no need to make new modules
 //       (it does not mean you do not need to instantiate new modules)
 //     - However, you may have to fix or add in / out ports for some modules
 //     - In addition, you are still free to instantiate simple modules like
 //       multiplexers, adders, etc.
-///////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 
 module simple_cpu
 #(parameter DATA_WIDTH = 32)(
@@ -179,8 +179,57 @@ instruction_memory m_instruction_memory(
   .instruction (if_instruction)
 );
 
-/* Prerequisites for Branch Hardware */
+/* Branch Hardware */
 assign if_opcode = if_instruction[6 : 0];
+
+/*
+branch_hardware m_branch_hardware (
+  // Input
+  .clk                (clk),
+  .rstn               (rstn),
+  .pc                 (if_PC),
+
+  .update_predictor   (update_predictor),
+  .update_btb         (update_btb),
+  .actually_taken     (actually_taken),
+  .resolved_pc        (resolved_pc),
+  .resolved_pc_target (resolved_pc_target),
+
+  // Output
+  .hit                (hit),
+  .pred               (pred),
+  .branch_target      (branch_target)
+);
+
+branch_target_buffer m_branch_target_buffer (
+  // Input
+  .clk                (clk),
+  .rstn               (rstn),
+  .pc                 (if_PC),
+
+  .update             (update),
+  .resolved_pc        (resolved_pc),
+  .resolved_pc_target (resolved_pc_target),
+
+  // Output
+  .hit                (hit),
+  .target_address     (target_address)
+);
+
+gshare m_gshare (
+  // Input
+  .clk            (clk),
+  .rstn           (rstn),
+  .pc             (if_PC),
+
+  .update         (update),
+  .actually_taken (actually_taken),
+  .resolved_pc    (resolved_pc),
+
+  // Output
+  .pred           (pred)
+);
+*/
 
 /* forward to IF/ID stage registers */
 ifid_reg m_ifid_reg(
