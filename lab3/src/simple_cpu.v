@@ -426,11 +426,10 @@ alu_control m_alu_control(
 wire [31 : 0] alu_in1, alu_in2;
 wire alu_check;
 
-mux_4x1 muxu(ex_ui,
+mux_3x1 muxu(ex_ui,
   fwd_data1,     // 00 => Proceed as Normal, NOT U-TYPE
-  32'h0000_0000, // 01 => Undefined, ERROR
-  32'h0000_0000, // 10 => U-type & LUI
-  ex_PC,         // 11 => U-type & AUIPC
+  32'h0000_0000, // 01 => U-type & LUI
+  ex_PC,         // 10 => U-type & AUIPC
   alu_in1
 );
 
