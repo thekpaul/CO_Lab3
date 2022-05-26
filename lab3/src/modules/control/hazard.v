@@ -17,8 +17,8 @@ module hazard #(
   input [DATA_WIDTH - 1 : 0] pc_plus_4,
   input [DATA_WIDTH - 1 : 0] pc_target,
 
-  output flush,
-  output stall
+  output reg flush,
+  output reg stall
 );
 
 /* Algorithm Flow
@@ -39,15 +39,18 @@ module hazard #(
 *
 */
 
-reg reg_flush = 1'b0;
-reg reg_stall = 1'b0;
+initial begin
+  flush <= 1'b0;
+  stall <= 1'b0;
+end
+
 reg [2 : 0] use_rs = 3'bXXX; // use_rs1 = use_rs[1], use_rs2 = use_rs[2]
 
 always @(*) begin
 
   // FLUSH
-  if (pc_plus_4 != pc_target) reg_flush <= 1'b1;
-  else reg_flush <= 1'b0;
+  if (pc_plus_4 != pc_target) flush <= 1'b1;
+  else flush <= 1'b0;
 
   // USAGE Determination
   casex (opcode)
@@ -67,11 +70,8 @@ always @(*) begin
   if ( (use_rs[1] == 1'b1 && (id_rs1 != 5'b00000) &&
           (id_rs1 ==  ex_rd) &&  ex_memread == 1'b1 ) ||
        (use_rs[2] == 1'b1 && (id_rs2 != 5'b00000) &&
-          (id_rs2 ==  ex_rd) &&  ex_memread == 1'b1 ) ) reg_stall <= 1'b1;
-  else reg_stall <= 1'b0;
+          (id_rs2 ==  ex_rd) &&  ex_memread == 1'b1 ) ) stall <= 1'b1;
+  else stall <= 1'b0;
 end
-
-assign flush = reg_flush;
-assign stall = reg_stall;
 
 endmodule
