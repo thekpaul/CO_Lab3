@@ -182,6 +182,9 @@ instruction_memory m_instruction_memory(
 /* Branch Hardware */
 assign if_opcode = if_instruction[6 : 0];
 
+wire update;
+assign update = (if_opcode == 7'b110_0011);
+
 /*
 branch_hardware m_branch_hardware (
   // Input
@@ -191,15 +194,16 @@ branch_hardware m_branch_hardware (
 
   .update_predictor   (update_predictor),
   .update_btb         (update_btb),
-  .actually_taken     (actually_taken),
-  .resolved_pc        (resolved_pc),
-  .resolved_pc_target (resolved_pc_target),
+  .actually_taken     (ex_taken),
+  .resolved_pc        (ex_PC),
+  .resolved_pc_target (ex_pc_tartget),
 
   // Output
   .hit                (hit),
   .pred               (pred),
   .branch_target      (branch_target)
 );
+
 
 branch_target_buffer m_branch_target_buffer (
   // Input
@@ -441,9 +445,9 @@ alu m_alu(
   .check    (alu_check)
 );
 
+/* m_branch_target_adder: PC + imm for branch address */
 wire [DATA_WIDTH - 1 : 0] ex_branch_dest;
 
-/* m_branch_target_adder: PC + imm for branch address */
 adder m_branch_target_adder(
   .in_a   (ex_PC),
   .in_b   (ex_sextimm),
@@ -452,18 +456,26 @@ adder m_branch_target_adder(
 );
 
 /* m_branch_control: checks T/NT */
-wire taken;
+wire fun_check;
+assign fun_check = (alu_check == ex_funct3[0]);
 
 branch_control m_branch_control(
   .branch (ex_branch),
-  .check  (alu_check),
+  .check  (fun_check),
 
   .taken  (ex_taken)
 );
 
+wire [DATA_WIDTH - 1 : 0] ex_PC_no_jump;
+
+mux_2x1 muxb(ex_taken,
+  ex_pc_plus_4,   // 0 => Not Branched, PC + 4 is fed
+  ex_branch_dest, // 1 => Not Branched, Branch Target is fed
+  ex_PC_no_jump
+);
+
 mux_4x1 muxj(ex_jump,          // Jump[1 : 0] => 00 (X) / 01 (JAL) / 11 (JALR)
-  (ex_branch == 1'b0 || ex_taken != ex_funct3[0])
-    ? ex_pc_plus_4 : ex_branch_dest, // 00 => No Jump, Test Branch
+  ex_PC_no_jump, // 00 => No Jump, Test Branch
   (ex_PC + ex_sextimm),              // 01 => JAL, Add `imm` to Current PC
   ex_pc_plus_4,                      // 10 => Default for error cases
   (ex_readdata1 + ex_sextimm),       // 11 => JALR, Add `imm` to `rs1` TODO
