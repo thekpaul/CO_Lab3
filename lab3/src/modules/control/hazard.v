@@ -13,11 +13,7 @@ module hazard #(
   input [4 : 0] id_rs2,
   input [6 : 0] opcode,
   input [4 : 0] ex_rd,
-  input [4 : 0] mem_rd,
-  input [4 : 0] wb_rd,
   input ex_memread,
-  input mem_memread,
-  input wb_memread,
   input [DATA_WIDTH - 1 : 0] pc_plus_4,
   input [DATA_WIDTH - 1 : 0] pc_target,
 
@@ -69,13 +65,9 @@ always @(*) begin
 
   // STALL
   if ( (use_rs[1] == 1'b1 && (id_rs1 != 5'b00000) &&
-        ( (id_rs1 ==  ex_rd) &&  ex_memread == 1'b1 ||
-          (id_rs1 == mem_rd) && mem_memread == 1'b1 ||
-          (id_rs1 ==  wb_rd) &&  wb_memread == 1'b1 ) ) ||
+          (id_rs1 ==  ex_rd) &&  ex_memread == 1'b1 ) ||
        (use_rs[2] == 1'b1 && (id_rs2 != 5'b00000) &&
-        ( (id_rs2 ==  ex_rd) &&  ex_memread == 1'b1 ||
-          (id_rs2 == mem_rd) && mem_memread == 1'b1 ||
-          (id_rs2 ==  wb_rd) &&  wb_memread == 1'b1 ) ) ) reg_stall <= 1'b1;
+          (id_rs2 ==  ex_rd) &&  ex_memread == 1'b1 ) ) reg_stall <= 1'b1;
   else reg_stall <= 1'b0;
 end
 
