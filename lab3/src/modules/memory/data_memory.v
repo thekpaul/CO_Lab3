@@ -19,9 +19,10 @@ module data_memory #(
     // change memory size
   initial $readmemh("data/data_memory.mem", mem_array);
   // wire reg for writedata
-  wire [MEM_ADDR_SIZE-1:0] address_internal; // 256 = 8-bit address
+  wire [MEM_ADDR_SIZE - 1 : 0] address_internal; // 256 = 8-bit address
 
-  assign address_internal = address[MEM_ADDR_SIZE+1:2]; // 256 = 8-bit address
+  assign address_internal = address[MEM_ADDR_SIZE + 1 : 2];
+    // 256 = 8-bit address
 
   // update at negative edge
   always @(negedge clk) begin

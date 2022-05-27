@@ -157,14 +157,6 @@ adder m_pc_plus_4_adder(
 
 wire [DATA_WIDTH - 1 : 0] next_pc;
 
-mux_4x1 next({flush, stall},
-  if_pc_plus_4, // 00 => Default Incrementation
-  PC,           // 01 => Stall
-  ex_pc_target, // 10 => Next PC Changed => Detect by Flush
-  ex_pc_target, // 11 => Next PC Changed => Flush, Ignore Stall
-  next_pc
-);
-
 always @(posedge clk) begin
   if (rstn == 1'b0) PC <= 32'h00000000;
   else PC <= next_pc;
@@ -182,58 +174,42 @@ instruction_memory m_instruction_memory(
 /* Branch Hardware */
 assign if_opcode = if_instruction[6 : 0];
 
-wire update;
-assign update = (if_opcode == 7'b110_0011);
+wire hit;
+wire pred;
+wire [DATA_WIDTH - 1 : 0] bp_target;
 
-/*
 branch_hardware m_branch_hardware (
   // Input
   .clk                (clk),
   .rstn               (rstn),
   .pc                 (if_PC),
 
-  .update_predictor   (update_predictor),
-  .update_btb         (update_btb),
+  .update_predictor   (ex_branch),
+  .update_btb         (flush),
   .actually_taken     (ex_taken),
   .resolved_pc        (ex_PC),
-  .resolved_pc_target (ex_pc_tartget),
+  .resolved_pc_target (ex_pc_target),
 
   // Output
   .hit                (hit),
   .pred               (pred),
-  .branch_target      (branch_target)
+  .branch_target      (bp_target)
 );
 
+wire [DATA_WIDTH - 1 : 0] guess_PC;
 
-branch_target_buffer m_branch_target_buffer (
-  // Input
-  .clk                (clk),
-  .rstn               (rstn),
-  .pc                 (if_PC),
-
-  .update             (update),
-  .resolved_pc        (resolved_pc),
-  .resolved_pc_target (resolved_pc_target),
-
-  // Output
-  .hit                (hit),
-  .target_address     (target_address)
+mux_2x1 bpPC((hit && pred),
+  if_pc_plus_4, // 0 => No Prediction, move to PC + 4
+  bp_target,    // 1 => Prediction, move to predicted PC
+  guess_PC      // Guessed PC without branch resolve
 );
 
-gshare m_gshare (
-  // Input
-  .clk            (clk),
-  .rstn           (rstn),
-  .pc             (if_PC),
-
-  .update         (update),
-  .actually_taken (actually_taken),
-  .resolved_pc    (resolved_pc),
-
-  // Output
-  .pred           (pred)
+mux_3x1 next({flush, (~flush && stall)},
+  guess_PC, // 00 => Default Incrementation
+  PC,           // 01 => Stall
+  ex_pc_target, // 10 => Next PC Changed => Detect by Flush
+  next_pc
 );
-*/
 
 /* forward to IF/ID stage registers */
 ifid_reg m_ifid_reg(
@@ -440,7 +416,7 @@ alu m_alu(
   .check    (alu_check)
 );
 
-/* m_branch_target_adder: PC + imm for branch address */
+/* m_PC_target_adder: PC + imm for branch address */
 wire [DATA_WIDTH - 1 : 0] ex_move_dest;
 wire [DATA_WIDTH - 1 : 0] ex_recipe;
 
@@ -450,7 +426,7 @@ mux_2x1 jalr(ex_jump[1],
   ex_recipe
 );
 
-adder m_branch_target_adder(
+adder m_PC_target_adder(
   .in_a   (ex_recipe),
   .in_b   (ex_sextimm),
 
