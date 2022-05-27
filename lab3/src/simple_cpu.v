@@ -30,7 +30,6 @@ wire stall; // Super-stage Stall Signal
 wire [DATA_WIDTH - 1 : 0] if_PC;
 wire [DATA_WIDTH - 1 : 0] if_pc_plus_4;
 wire [DATA_WIDTH - 1 : 0] if_instruction;
-wire [6 : 0] if_opcode;
 
 ///////////////////////////////////////////
 //        ID WIRES                       //
@@ -56,7 +55,7 @@ wire id_memtoreg;
 wire id_regwrite;
 
 wire [DATA_WIDTH - 1 : 0] id_sextimm;
-wire [6 : 0] id_opcode;
+wire [6 : 0] opcode;
 wire [6 : 0] id_funct7;
 wire [2 : 0] id_funct3;
 wire [DATA_WIDTH - 1 : 0] id_readdata1;
@@ -172,11 +171,12 @@ instruction_memory m_instruction_memory(
 );
 
 /* Branch Hardware */
-assign if_opcode = if_instruction[6 : 0];
-
 wire hit;
 wire pred;
 wire [DATA_WIDTH - 1 : 0] bp_target;
+
+// assign hit  = 1'b0;
+// assign pred = 1'b0;
 
 branch_hardware m_branch_hardware (
   // Input
@@ -205,10 +205,46 @@ mux_2x1 bpPC((hit && pred),
 );
 
 mux_3x1 next({flush, (~flush && stall)},
-  guess_PC, // 00 => Default Incrementation
+  guess_PC,     // 00 => Default Incrementation
   PC,           // 01 => Stall
   ex_pc_target, // 10 => Next PC Changed => Detect by Flush
   next_pc
+);
+
+wire [31:0] NUM_COND_BRANCHES;
+hardware_counter m_branch_count(
+  .clk  (clk),
+  .rstn (rstn),
+  .cond (ex_branch),
+
+  .counter(NUM_COND_BRANCHES)
+);
+
+wire [31:0] NUM_UNCOND_BRANCHES;
+hardware_counter m_jump_count(
+  .clk  (clk),
+  .rstn (rstn),
+  .cond (ex_jump[0]),
+
+  .counter(NUM_UNCOND_BRANCHES)
+);
+
+wire [31:0] BP_CORRECT;
+hardware_counter m_bp_correct(
+  .clk  (clk),
+  .rstn (rstn),
+  .cond ((ex_branch || ex_jump[0]) && ~flush),
+
+  .counter(BP_CORRECT)
+);
+
+wire [31:0] BP_INCORRECT;
+hardware_counter m_bp_incorrect(
+  .clk  (clk),
+  .rstn (rstn),
+  .cond (flush),
+
+  .counter(BP_INCORRECT)
 );
 
 /* forward to IF/ID stage registers */
@@ -221,12 +257,10 @@ ifid_reg m_ifid_reg(
   .if_PC          (if_PC),
   .if_pc_plus_4   (if_pc_plus_4),
   .if_instruction (if_instruction),
-  .if_opcode      (if_opcode),
 
   .id_PC          (id_PC),
   .id_pc_plus_4   (id_pc_plus_4),
-  .id_instruction (id_instruction),
-  .id_opcode      (id_opcode)
+  .id_instruction (id_instruction)
 );
 
 
@@ -235,6 +269,7 @@ ifid_reg m_ifid_reg(
 ///////////////////////////////////////////////////////////////////////////////
 
 // instruction fields
+assign opcode = id_instruction[6 : 0];
 assign id_funct7 = id_instruction[31 : 25];
 assign id_funct3 = id_instruction[14 : 12];
 
@@ -245,15 +280,23 @@ assign id_rd  = id_instruction[11 : 7];
 
 
 /* m_hazard: hazard detection unit */
+wire [DATA_WIDTH - 1 : 0] haza_detect;
+
+mux_2x1 haza(stall,
+  id_PC,         // 0 => NOT STALLED
+  32'h0000_0000, // 1 => STALLED
+  haza_detect
+);
 
 hazard m_hazard(
   // TODO: implement hazard detection unit & do wiring
+  .rstn         (rstn),
   .id_rs1       (id_rs1),
   .id_rs2       (id_rs2),
-  .opcode       (id_opcode),
+  .opcode       (opcode),
   .ex_rd        (ex_rd),
   .ex_memread   (ex_memread),
-  .pc_plus_4    (ex_pc_plus_4),
+  .pc_plus_4    (haza_detect),
   .pc_target    (ex_pc_target),
 
   .flush        (flush),
@@ -263,7 +306,7 @@ hazard m_hazard(
 /* m_control: control unit */
 
 control m_control(
-  .opcode     (id_opcode),
+  .opcode     (opcode),
 
   .ui         (id_ui),
   .jump       (id_jump),
