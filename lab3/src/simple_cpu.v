@@ -175,26 +175,26 @@ wire hit;
 wire pred;
 wire [DATA_WIDTH - 1 : 0] bp_target;
 
-// assign hit  = 1'b0;
-// assign pred = 1'b0;
+assign hit  = 1'b0;
+assign pred = 1'b0;
 
-branch_hardware m_branch_hardware (
-  // Input
-  .clk                (clk),
-  .rstn               (rstn),
-  .pc                 (if_PC),
-
-  .update_predictor   (ex_branch),
-  .update_btb         (flush),
-  .actually_taken     (ex_taken),
-  .resolved_pc        (ex_PC),
-  .resolved_pc_target (ex_pc_target),
-
-  // Output
-  .hit                (hit),
-  .pred               (pred),
-  .branch_target      (bp_target)
-);
+// branch_hardware m_branch_hardware (
+//   // Input
+//   .clk                (clk),
+//   .rstn               (rstn),
+//   .pc                 (if_PC),
+//
+//   .update_predictor   (ex_branch),
+//   .update_btb         (flush),
+//   .actually_taken     (ex_taken),
+//   .resolved_pc        (ex_PC),
+//   .resolved_pc_target (ex_pc_target),
+//
+//   // Output
+//   .hit                (hit),
+//   .pred               (pred),
+//   .branch_target      (bp_target)
+// );
 
 wire [DATA_WIDTH - 1 : 0] guess_PC;
 
@@ -568,11 +568,10 @@ memwb_reg m_memwb_reg(
 
 // TODO: Implement Write-Back on Top Module
 
-mux_4x1 muxw({wb_jump[0], {wb_memtoreg}},
+mux_3x1 muxw({wb_jump[0], (wb_memtoreg == 1'b1)},
   wb_alu_result, // Jump 0, MemToReg 0 => Write memory data
   wb_readdata,   // Jump 0, MemToReg 1 => Write ALU result
-  wb_pc_plus_4,  // Jump 1, MemToReg X => Write Jump Previous PC + 4
-  wb_pc_plus_4,  // Jump 1, MemToReg X => Write Jump Previous PC + 4
+  wb_pc_plus_4,  // Jump 1, MemToReg 0 => Write Jump Previous PC + 4
   write_data
 );
 
