@@ -45,11 +45,17 @@ wire [DATA_WIDTH - 1 : 0] pc_target;
 
 always @(*) begin // Reset BHR and PHT - Whenever
 
-  if (rstn == 1'b1) begin
+  if (rstn == 1'b0) begin
 
-    hit  <= 1'b0;
-    pred <= 1'b0;
-    branch_target <= 32'h0000_0000;
+    hit  = 1'b0;
+    pred = 1'b0;
+    branch_target = 32'h0000_0000;
+
+  end else begin
+
+    hit  = in_hit;
+    pred = in_pred;
+    branch_target = (hit && pred) ? pc_target : (pc + 32'h0000_0004);
 
   end
 end
@@ -94,13 +100,5 @@ gshare m_gshare (
   // Output
   .pred           (in_pred)
 );
-
-always @(posedge clk) begin
-
-  hit  <= in_hit;
-  pred <= in_pred;
-  branch_target <= (hit && pred) ? pc_target : (pc + 32'h0000_0004);
-
-end
 
 endmodule

@@ -52,8 +52,8 @@ always @(*) begin // Reset BHR and PHT - Whenever
   end else begin
 
     // Save PC_Target based on Current ex_PC
-    hit = 1'b1;
     idx = pc[9 : 2];
+    hit = btb[idx][40];
     target_address = btb[idx][DATA_WIDTH - 1 : 0];
 
   end
