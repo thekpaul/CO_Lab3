@@ -39,6 +39,10 @@ initial begin
 
 end
 
+wire in_hit;
+wire in_pred;
+wire [DATA_WIDTH - 1 : 0] pc_target;
+
 always @(*) begin // Reset BHR and PHT - Whenever
 
   if (rstn == 1'b1) begin
@@ -73,8 +77,8 @@ branch_target_buffer m_branch_target_buffer (
   .resolved_pc_target (resolved_pc_target),
 
   // Output
-  .hit                (hit),
-  .target_address     (branch_target)
+  .hit                (in_hit),
+  .target_address     (pc_target)
 );
 
 gshare m_gshare (
@@ -88,7 +92,15 @@ gshare m_gshare (
   .resolved_pc    (resolved_pc),
 
   // Output
-  .pred           (pred)
+  .pred           (in_pred)
 );
+
+always @(posedge clk) begin
+
+  hit  <= in_hit;
+  pred <= in_pred;
+  branch_target <= (hit && pred) ? pc_target : (pc + 32'h0000_0004);
+
+end
 
 endmodule

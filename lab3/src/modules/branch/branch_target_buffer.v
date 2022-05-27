@@ -31,28 +31,35 @@ reg [DATA_WIDTH + 8 : 0] btb [0 : NUM_ENTRIES - 1];
 
 initial begin
 
-  idx <= 8'b0000_0000;
-  hit <= 1'b0;
-  target_address <= 32'h0000_0000;
+  idx = 8'b0000_0000;
+  hit = 1'b0;
+  target_address = 32'h0000_0000;
   for (integer i = 0; i < NUM_ENTRIES; i =+ 1)
-    btb[i] <= {(DATA_WIDTH + 9){1'b0}};
+    btb[i] = {(DATA_WIDTH + 9){1'b0}};
 
 end
 
 always @(*) begin // Reset BHR and PHT - Whenever
 
-  if (rstn == 1'b1) begin
+  if (rstn == 1'b0) begin
 
-    idx <= 8'b0000_0000;
-    hit <= 1'b0;
-    target_address <= 32'h0000_0000;
+    idx = 8'b0000_0000;
+    hit = 1'b0;
+    target_address = 32'h0000_0000;
     for (integer i = 0; i < NUM_ENTRIES; i =+ 1)
-      btb[i] <= {(DATA_WIDTH + 9){1'b0}};
+      btb[i] = {(DATA_WIDTH + 9){1'b0}};
+
+  end else begin
+
+    // Save PC_Target based on Current ex_PC
+    hit = 1'b1;
+    idx = pc[9 : 2];
+    target_address = btb[idx][DATA_WIDTH - 1 : 0];
 
   end
 end
 
-always @(negedge clk) begin // Acculmulate Past Global History - Negative Clock
+always @(posedge clk) begin // Acculmulate Past Global History - Negative Clock
   if (update == 1'b1) begin
 
     // Save PC_Target based on Current ex_PC
@@ -62,15 +69,6 @@ always @(negedge clk) begin // Acculmulate Past Global History - Negative Clock
     btb[idx][DATA_WIDTH - 1 : 0] <= resolved_pc_target;
 
   end
-end
-
-always @(posedge clk) begin // Access Global History with ALL new PC - Positive
-
-    // Save PC_Target based on Current ex_PC
-    idx <= pc[9 : 2];
-    target_address <= btb[idx][DATA_WIDTH - 1 : 0];
-    hit <= 1'b1;
-
 end
 
 endmodule

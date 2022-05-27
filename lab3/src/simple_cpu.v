@@ -175,26 +175,26 @@ wire hit;
 wire pred;
 wire [DATA_WIDTH - 1 : 0] bp_target;
 
-assign hit  = 1'b0;
-assign pred = 1'b0;
+// assign hit  = 1'b0;
+// assign pred = 1'b0;
 
-// branch_hardware m_branch_hardware (
-//   // Input
-//   .clk                (clk),
-//   .rstn               (rstn),
-//   .pc                 (if_PC),
-//
-//   .update_predictor   (ex_branch),
-//   .update_btb         (flush),
-//   .actually_taken     (ex_taken),
-//   .resolved_pc        (ex_PC),
-//   .resolved_pc_target (ex_pc_target),
-//
-//   // Output
-//   .hit                (hit),
-//   .pred               (pred),
-//   .branch_target      (bp_target)
-// );
+branch_hardware m_branch_hardware (
+  // Input
+  .clk                (clk),
+  .rstn               (rstn),
+  .pc                 (if_PC),
+
+  .update_predictor   (ex_branch),
+  .update_btb         (flush),
+  .actually_taken     (ex_taken),
+  .resolved_pc        (ex_PC),
+  .resolved_pc_target (ex_pc_target),
+
+  // Output
+  .hit                (hit),
+  .pred               (pred),
+  .branch_target      (bp_target)
+);
 
 wire [DATA_WIDTH - 1 : 0] guess_PC;
 
