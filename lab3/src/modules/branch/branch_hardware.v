@@ -33,15 +33,52 @@ module branch_hardware #(
 
 initial begin
 
-  hit  <= 1'b0;
-  pred <= 1'b0;
-  branch_target <= 32'h0000_0000;
+  hit  = 1'b0;
+  pred = 1'b0;
+  branch_target = 32'h0000_0000;
 
 end
 
 wire in_hit;
 wire in_pred;
 wire [DATA_WIDTH - 1 : 0] pc_target;
+
+// always @(posedge clk) begin
+//   if (update_predictor == 1'b1) begin
+//   end
+//   if (update_btb == 1'b1) begin
+//   end
+
+// branch_target_buffer m_btb (
+//   // Input
+//   .clk                (clk),
+//   .rstn               (rstn),
+//
+//   .update             (update_btb),
+//   .resolved_pc        (resolved_pc),
+//   .resolved_pc_target (resolved_pc_target),
+//
+//   .pc                 (pc),
+//
+//   // Output
+//   .hit                (in_hit),
+//   .target_address     (pc_target)
+// );
+
+// gshare m_gshare (
+//   // Input
+//   .clk            (clk),
+//   .rstn           (rstn),
+//
+//   .update         (update_predictor),
+//   .actually_taken (ex_taken),
+//   .resolved_pc    (resolved_pc),
+//
+//   .pc             (pc),
+//
+//   // Output
+//   .pred           (in_pred)
+// );
 
 always @(*) begin // Reset BHR and PHT - Whenever
 
@@ -55,50 +92,9 @@ always @(*) begin // Reset BHR and PHT - Whenever
 
     hit  = in_hit;
     pred = in_pred;
-    branch_target = (hit && pred) ? pc_target : (pc + 32'h0000_0004);
+    branch_target = pc_target;
 
   end
 end
-
-// always @(negedge clk) begin // Acculmulate Past Global History - Negative Clock
-//   if (update_predictor == 1'b1) begin
-//   end
-//   if (update_btb == 1'b1) begin
-//   end
-//
-// always @(posedge clk) begin // Access Global History with ALL new PC - Positive
-//
-//
-//
-// end
-
-branch_target_buffer m_branch_target_buffer (
-  // Input
-  .clk                (clk),
-  .rstn               (rstn),
-  .pc                 (pc),
-
-  .update             (update_btb),
-  .resolved_pc        (resolved_pc),
-  .resolved_pc_target (resolved_pc_target),
-
-  // Output
-  .hit                (in_hit),
-  .target_address     (pc_target)
-);
-
-gshare m_gshare (
-  // Input
-  .clk            (clk),
-  .rstn           (rstn),
-  .pc             (pc),
-
-  .update         (update_predictor),
-  .actually_taken (ex_taken),
-  .resolved_pc    (resolved_pc),
-
-  // Output
-  .pred           (in_pred)
-);
 
 endmodule

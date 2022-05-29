@@ -41,19 +41,19 @@ always @(*) begin // Reset BHR and PHT - Whenever
 
   if (rstn == 1'b0) begin
 
-    bhr <= 8'b0000_0000; // All Entries  in BHR are initialised to 1'b0
-    for (integer i = 0; i < NUM_ENTRIES; i =+ 1) pht[i] <= 2'b01;
+    bhr = 8'b0000_0000; // All Entries  in BHR are initialised to 1'b0
+    for (integer i = 0; i < NUM_ENTRIES; i =+ 1) pht[i] = 2'b01;
       // All Counters in PHT are initialised to 2'b01
 
   end else begin
 
     // Locate Corresponding Count by XOR
     for (integer b = 8; b > 0; b =- 1) begin
-      idx[b - 1] <= pc[b + 1] ^ bhr[b - 1];
+      idx[b - 1] = pc[b + 1] ^ bhr[b - 1];
     end
 
     // Return Corresponding Count in Relation to `PRED`
-    pred <= pht[idx][1]; // Larger bit represents TAKEN value
+    pred = pht[idx][1]; // Larger bit represents TAKEN value
 
   end
 end
