@@ -5,10 +5,10 @@ module register_file #(
   parameter DATA_WIDTH = 32,
   parameter ADDR_WIDTH = 5
 )(
-  input clk, 
+  input clk,
   input  [ADDR_WIDTH-1:0] readreg1, readreg2, writereg,
   input  [DATA_WIDTH-1:0] writedata,
-  input wen, 
+  input wen,
 
   output [DATA_WIDTH-1:0] readdata1,
   output [DATA_WIDTH-1:0] readdata2
@@ -19,7 +19,7 @@ module register_file #(
   initial $readmemh("data/register.mem", reg_array); // change inital register file for fib example
 
   // update regfile at the falling edge
-  always @(negedge clk) begin 
+  always @(negedge clk) begin
     if (wen == 1'b1) reg_array[writereg] <= writedata;
     reg_array[0] <= 0; // x0 is always zero in RISC-V
   end

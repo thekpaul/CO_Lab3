@@ -21,17 +21,17 @@ module forwarding (
 always @(*) begin
 
 // fwdA
-  if (  (rs1 != 5'b00000) & (rs1 == mem_rd) & (mem_regwrite)) fwdA <= 2'b01;
+  if (  (rs1 != 5'b00000) & (rs1 == mem_rd) & (mem_regwrite)) fwdA = 2'b01;
   else begin
-    if ((rs1 != 5'b00000) & (rs1 == wb_rd)  & (wb_regwrite))  fwdA <= 2'b10;
-    else fwdA <= 2'b00;
+    if ((rs1 != 5'b00000) & (rs1 == wb_rd)  & (wb_regwrite))  fwdA = 2'b10;
+    else fwdA = 2'b00;
   end
 
 // fwdB
-  if (  (rs2 != 5'b00000) & (rs2 == mem_rd) & (mem_regwrite)) fwdB <= 2'b01;
+  if (  (rs2 != 5'b00000) & (rs2 == mem_rd) & (mem_regwrite)) fwdB = 2'b01;
   else begin
-    if ((rs2 != 5'b00000) & (rs2 == wb_rd)  & (wb_regwrite))  fwdB <= 2'b10;
-    else fwdB <= 2'b00;
+    if ((rs2 != 5'b00000) & (rs2 == wb_rd)  & (wb_regwrite))  fwdB = 2'b10;
+    else fwdB = 2'b00;
   end
 end
 

@@ -206,8 +206,8 @@ mux_2x1 bpPC((hit && pred),
 
 mux_3x1 next({flush, (~flush && stall)},
   guess_PC,     // 00 => Default Incrementation
-  PC,           // 01 => Stall
-  ex_pc_target, // 10 => Next PC Changed => Detect by Flush
+  PC,           // 10 => Stall
+  ex_pc_target, // 01 => Next PC Changed => Detect by Flush
   next_pc
 );
 

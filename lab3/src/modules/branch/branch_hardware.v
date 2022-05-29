@@ -31,70 +31,47 @@ module branch_hardware #(
 
 // TODO: Instantiate a branch predictor and a BTB.
 
-initial begin
-
-  hit  = 1'b0;
-  pred = 1'b0;
-  branch_target = 32'h0000_0000;
-
-end
-
 wire in_hit;
 wire in_pred;
 wire [DATA_WIDTH - 1 : 0] pc_target;
 
-// always @(posedge clk) begin
-//   if (update_predictor == 1'b1) begin
-//   end
-//   if (update_btb == 1'b1) begin
-//   end
+branch_target_buffer m_btb (
+  // Input
+  .clk                (clk),
+  .rstn               (rstn),
 
-// branch_target_buffer m_btb (
-//   // Input
-//   .clk                (clk),
-//   .rstn               (rstn),
-//
-//   .update             (update_btb),
-//   .resolved_pc        (resolved_pc),
-//   .resolved_pc_target (resolved_pc_target),
-//
-//   .pc                 (pc),
-//
-//   // Output
-//   .hit                (in_hit),
-//   .target_address     (pc_target)
-// );
+  .update             (update_btb),
+  .resolved_pc        (resolved_pc),
+  .resolved_pc_target (resolved_pc_target),
 
-// gshare m_gshare (
-//   // Input
-//   .clk            (clk),
-//   .rstn           (rstn),
-//
-//   .update         (update_predictor),
-//   .actually_taken (ex_taken),
-//   .resolved_pc    (resolved_pc),
-//
-//   .pc             (pc),
-//
-//   // Output
-//   .pred           (in_pred)
-// );
+  .pc                 (pc),
 
-always @(*) begin // Reset BHR and PHT - Whenever
+  // Output
+  .hit                (in_hit),
+  .target_address     (pc_target)
+);
 
-  if (rstn == 1'b0) begin
+gshare m_gshare (
+  // Input
+  .clk            (clk),
+  .rstn           (rstn),
 
-    hit  = 1'b0;
-    pred = 1'b0;
-    branch_target = 32'h0000_0000;
+  .update         (update_predictor),
+  .actually_taken (actually_taken),
+  .resolved_pc    (resolved_pc),
 
-  end else begin
+  .pc             (pc),
 
-    hit  = in_hit;
-    pred = in_pred;
-    branch_target = pc_target;
+  // Output
+  .pred           (in_pred)
+);
 
-  end
+always @(*) begin
+
+  hit  = in_hit;
+  pred = in_pred;
+  branch_target = pc_target;
+
 end
 
 endmodule

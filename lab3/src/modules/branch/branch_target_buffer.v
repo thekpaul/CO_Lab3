@@ -25,19 +25,9 @@ module branch_target_buffer #(
 
 // TODO: Implement BTB
 
-reg [7 : 0] idx;
-reg [DATA_WIDTH - 11 : 0] tag;
-reg [DATA_WIDTH : 0] btb [0 : NUM_ENTRIES - 1];
-// 1 bit for VALID, 32 bits for PC_TARGET | FUCK TAG
+reg [54 : 0] btb [0 : NUM_ENTRIES - 1];
 
-initial begin
-
-  hit = 1'b0;
-  target_address = 32'h0000_0000;
-  for (integer i = 0; i < NUM_ENTRIES; i =+ 1)
-    btb[i] = {55{1'b0}};
-
-end
+integer d;
 
 always @(*) begin // Reset BHR and PHT - Whenever
 
@@ -45,20 +35,16 @@ always @(*) begin // Reset BHR and PHT - Whenever
 
     hit = 1'b0;
     target_address = 32'h0000_0000;
-    for (integer i = 0; i < NUM_ENTRIES; i =+ 1)
-      btb[i] = {55{1'b0}};
+    for (d = 0; d < NUM_ENTRIES; d = d + 1) btb[d] = {55{1'b0}};
 
   end else begin
 
-    // Save PC_Target based on Current ex_PC
-    idx = pc[9 : 2];
-    tag = pc[DATA_WIDTH - 1 : 10];
-    if (btb[idx][53 : DATA_WIDTH] === tag) begin
-      hit = btb[idx][54];
-      target_address = btb[idx][DATA_WIDTH - 1 : 0];
-    end else begin
-      hit = 1'b0;
-      target_address = 32'h0000_0000;
+    if (btb[pc[9 : 2]][53 : DATA_WIDTH] == pc[DATA_WIDTH - 1 : 10]) begin
+      hit = btb[pc[9 : 2]][54];
+      target_address = btb[pc[9 : 2]][DATA_WIDTH - 1 : 0];
+ // end else begin
+ //   hit = 1'b0;
+ //   target_address = 32'h0000_0000;
     end
 
   end
@@ -68,11 +54,10 @@ always @(posedge clk) begin // Acculmulate Past Global History - Negative Clock
   if (update == 1'b1) begin
 
     // Save PC_Target based on Current ex_PC
-    idx <= resolved_pc[9 : 2];
-    tag <= resolved_pc[DATA_WIDTH - 1 : 10];
-    btb[idx][54] <= 1'b1; // VALID
-    btb[idx][53 : DATA_WIDTH] <= tag;
-    btb[idx][DATA_WIDTH - 1 : 0] <= resolved_pc_target;
+    btb[resolved_pc[9 : 2]][54] <= 1'b1; // VALID
+    btb[resolved_pc[9 : 2]][53 : DATA_WIDTH]
+      <= resolved_pc[DATA_WIDTH - 1 : 10];
+    btb[resolved_pc[9 : 2]][DATA_WIDTH - 1 : 0] <= resolved_pc_target;
 
   end
 end
