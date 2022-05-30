@@ -1,3 +1,7 @@
+# A Pipelined RISC-V 32-bit Implementation with Branch Prediction
+
+> A Lab Repository for SNU ECE's Computer Organisation Lecture
+
 # [Lab 3] Branch Prediction Hardware
 
 ## Introduction
@@ -195,24 +199,3 @@ To do so, uncomment the rest of `$display` tasks in `src/riscv_tb.v` , and imple
 ```
 
 We will check the branch statistics to see if your branch hardware works correct.
-
-## Submission
-
-#DUE: **5/30 (MON) 11:59PM**
-
-### Late Policy
-* 10% discounted per day (5/31 12:00 AM is a late submission) 
-* After 06/03 (FRI) 12:00AM, you will get **zero** score for the assignment
-
-### What to Submit
-*  Your code that we can compile and run  
-*  Submit all the files/directories (do `make clean` first)
-* **1-page report that includes the following** for the benchmark workloads
-	* performance comparison between the baseline CPU (without branch hardware) and Lab 3 
-	* branch statistics (e.g., # of branch instructions and # of correct predictions)
-
-### How to Submit
-* Upload your compressed file (zip) to eTL
-* Format: **YourStudentID_YOURLASTNAME_lab#**
-	* e.g., 2020-12345_KIM_lab3.zip
-* Please make sure you follow the format (10% penalty for the wrong format)
