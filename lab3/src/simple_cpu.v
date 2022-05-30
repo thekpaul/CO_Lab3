@@ -163,6 +163,9 @@ end
 
 assign if_PC = PC;
 
+wire if_opcode;
+assign if_opcode = if_instruction[6 : 0];
+
 /* instruction: read current instruction from inst mem */
 instruction_memory m_instruction_memory(
   .address     (if_PC),
@@ -185,7 +188,7 @@ branch_hardware m_branch_hardware (
   .pc                 (if_PC),
 
   .update_predictor   (ex_branch),
-  .update_btb         (flush),
+  .update_btb         (ex_branch || ex_jump[0]),
   .actually_taken     (ex_taken),
   .resolved_pc        (ex_PC),
   .resolved_pc_target (ex_pc_target),
@@ -209,42 +212,6 @@ mux_3x1 next({flush, (~flush && stall)},
   PC,           // 10 => Stall
   ex_pc_target, // 01 => Next PC Changed => Detect by Flush
   next_pc
-);
-
-wire [31:0] NUM_COND_BRANCHES;
-hardware_counter m_branch_count(
-  .clk  (clk),
-  .rstn (rstn),
-  .cond (ex_branch),
-
-  .counter(NUM_COND_BRANCHES)
-);
-
-wire [31:0] NUM_UNCOND_BRANCHES;
-hardware_counter m_jump_count(
-  .clk  (clk),
-  .rstn (rstn),
-  .cond (ex_jump[0]),
-
-  .counter(NUM_UNCOND_BRANCHES)
-);
-
-wire [31:0] BP_CORRECT;
-hardware_counter m_bp_correct(
-  .clk  (clk),
-  .rstn (rstn),
-  .cond (ex_branch && ~flush),
-
-  .counter(BP_CORRECT)
-);
-
-wire [31:0] BP_INCORRECT;
-hardware_counter m_bp_incorrect(
-  .clk  (clk),
-  .rstn (rstn),
-  .cond (flush),
-
-  .counter(BP_INCORRECT)
 );
 
 /* forward to IF/ID stage registers */
@@ -576,10 +543,9 @@ memwb_reg m_memwb_reg(
 
 // TODO: Implement Write-Back on Top Module
 
-mux_3x1 muxw({wb_jump[0], (wb_memtoreg == 1'b1)},
+mux_2x1 muxw((wb_memtoreg == 1'b1),
   wb_alu_result, // Jump 0, MemToReg 0 => Write memory data
   wb_readdata,   // Jump 0, MemToReg 1 => Write ALU result
-  wb_pc_plus_4,  // Jump 1, MemToReg 0 => Write Jump Previous PC + 4
   write_data
 );
 
@@ -590,6 +556,42 @@ hardware_counter m_core_cycle(
   .cond(1'b1),
 
   .counter(CORE_CYCLE)
+);
+
+wire [31:0] NUM_COND_BRANCHES;
+hardware_counter m_branch_count(
+  .clk  (clk),
+  .rstn (rstn),
+  .cond (ex_branch),
+
+  .counter(NUM_COND_BRANCHES)
+);
+
+wire [31:0] NUM_UNCOND_BRANCHES;
+hardware_counter m_jump_count(
+  .clk  (clk),
+  .rstn (rstn),
+  .cond (ex_jump[0]),
+
+  .counter(NUM_UNCOND_BRANCHES)
+);
+
+wire [31:0] BP_CORRECT;
+hardware_counter m_bp_correct(
+  .clk  (clk),
+  .rstn (rstn),
+  .cond (ex_branch && (guess_PC == next_pc)),
+
+  .counter(BP_CORRECT)
+);
+
+wire [31:0] BP_INCORRECT;
+hardware_counter m_bp_incorrect(
+  .clk  (clk),
+  .rstn (rstn),
+  .cond (flush),
+
+  .counter(BP_INCORRECT)
 );
 
 endmodule

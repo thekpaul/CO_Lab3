@@ -1,0 +1,112 @@
+\documentclass[10pt]{article}
+\usepackage[margin=.75in, bottom=1in]{geometry}
+\usepackage[english]{babel}
+% \usepackage[newfloat]{minted} -> Unused for subjects without code
+\usepackage[doublespacing]{setspace}
+\usepackage[utf8]{inputenc}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[tbtags]{amsmath}
+\usepackage{kotex, amssymb, amsfonts, mathtools, pgf, enumitem, xfrac, siunitx,
+  etoolbox, array, pgfplots, caption, esint, float, tikz, standalone, graphicx,
+  ifthen, fancyhdr, titletoc, titlesec, multirow, multicol, tgpagella, bm}
+\DeclareUnicodeCharacter{2212}{−}
+\usepgfplotslibrary{groupplots,dateplot}
+\usetikzlibrary{angles, quotes, patterns,shapes.arrows}
+\pgfplotsset{compat=1.18}
+\usepackage[hidelinks]{hyperref}
+\pagestyle{fancy}
+  \fancyhf{}
+  \fancyhead[L]{Lab 3 : Branch Predictor Integration}
+  \fancyhead[R]{\thepage}
+  \fancyfoot[L]{2022년 1학기 컴퓨터조직론}
+  \fancyfoot[R]{전기·정보공학부 2018-17515 김형준}
+  \renewcommand{\headrulewidth}{0.5pt}
+  \renewcommand{\footrulewidth}{0.5pt}
+\renewcommand{\bar}[1]{%
+  \mkern 1.5mu\overline{%
+    \mkern 1.5mu #1 \mkern 1.5mu%
+  } \mkern 1.5mu%
+} \setlength{\parindent}{0.2in}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+% \setlength\tabcolsep{0pt}
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{
+  \node[shape=circle,draw,inner sep=0.5pt] (char) {\footnotesize{#1}};}
+}
+\newcommand{\qtyt}{\qty[mode = text]}
+\newcommand{\numt}{\num[mode = text]}
+\AtBeginDocument{%
+  \setlength\abovedisplayskip{5pt}
+  \setlength\belowdisplayskip{5pt}
+  \setlength\abovedisplayshortskip{3pt}
+  \setlength\belowdisplayshortskip{3pt}
+} \sisetup{inter-unit-product = \ensuremath{{\!}\cdot{\!}}, per-mode = symbol}
+\setlist[enumerate,1]{label=\arabic*.,leftmargin=0.2in}
+\setlist[enumerate,2]{label=\arabic*),leftmargin=0.2in}
+\renewcommand{\eqref}[1]{식 \ref{#1}}
+\newcommand{\kohm}[1]{\qty{#1}{\kilo\ohm}}
+\NewDocumentCommand \widecaps { o o m o } {%
+  \IfNoValueTF{#2} {%
+    \parbox{\linewidth}{%
+      \IfNoValueTF{#1} { \captionof{figure}{#3} } { \captionof{#1}{#3} }%
+      \IfValueTF{#4} { \label{#4} } {}%
+    }%
+  } {%
+    \parbox{#1}{%
+      \IfNoValueTF{#2} { \captionof{figure}{#3} } { \captionof{#2}{#3} }%
+      \IfValueTF{#4} { \label{#4} } {}%
+    }%
+  }%
+}
+% \captionsetup[figure]{aboveskip=5pt,belowskip=\baselineskip}
+% If-and-only-if Notation
+\NewDocumentCommand \iaoi { o } {%
+  \IfNoValueTF{#1} { \quad \Leftrightarrow \quad } { #1 \Leftrightarrow #1 }%
+}
+\makeatletter
+\let\mytagform@=\tagform@
+\def\tagform@#1{\maketag@@@{\scshape(\ignorespaces#1\unskip\@@italiccorr)}%
+    \hspace{3mm}}
+\makeatother
+\setlength{\columnsep}{0.3in}
+\setlength{\columnseprule}{0.2pt}
+\input{format}
+
+\begin{document}
+
+  \title{Lab 3 : Branch Predictor Integration}
+  \author{2018-17515 김형준}
+  \date{30 May 2022}
+  \maketitle
+  \thispagestyle{empty}
+
+Branch Prediction은 IF 단계에서 새로 입력된 PC를 기반으로, 향후 어떠한 방향으로
+프로그램이 진행될 지를 예상하는 과정이다. 하나의 PC는 변하지 않는 하나의
+instruction과 대응되므로, 기존 PC값을 분석해 향후 해당 PC값이 다시 입력될 때
+더 정확한 예측을 할 수 있다. 본 과제에서는 2-bit Gshare branch predictor 기법을
+활용해 branch prediction을 성공적으로 구현했으며, 기존에 비해 core cycle 성능과
+branch prediction 정확도가 증가했음을 알 수 있다 :
+
+\begin{center}
+  \begin{tabular}{ *2{C{.48\linewidth} } }
+    \input{1}
+    \widecaps{Branch Prediction CPU 성능 개선} &
+    \input{2}
+    \widecaps{Branch Prediction 정확도 증가} \\
+  \end{tabular}
+\end{center}
+
+특히 여러 시행에서 예상보다 높은 빈도로 Branch Prediction이 성공함을 확인할 수
+있었는데, 이는 근본적으로 Pipeline Architecture의 Hazard Control 중 다음 PC값,
+즉 \verb+next_PC+값이 Branch의 Target Address, 즉 \verb+ex_pc_target+값과
+동일할 때 flush를 진행하지 않는, 사실상의 taken 처리를 해주기에 발생하는
+현상으로 판단된다.
+
+\verb+branch_hardware.v+ 모듈은 \verb+branch_target_buffer.v+와
+\verb+gshare.v+의 입출력 관계를 정립하는 역할을 하며, \\
+\verb+branch_target_buffer.v+와 \verb+gshare.v+에서는 각각 branch target
+buffer와 Gshare 메모리를 선언, 해당 배열에 접근하는 방식과 배열 내 저장된
+데이터를 새로고침하는 방법을 정의했다.
+
+\end{document}

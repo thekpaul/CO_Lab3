@@ -1,0 +1,230 @@
+% MATH
+% Better Vector Notation
+\makeatletter
+\newlength\xvec@height%
+\newlength\xvec@depth%
+\newlength\xvec@width%
+\newcommand{\xvec}[2][]{%
+  \ifmmode%
+    \settoheight{\xvec@height}{$#2$}%
+    \settodepth{\xvec@depth}{$#2$}%
+    \settowidth{\xvec@width}{$#2$}%
+  \else%
+    \settoheight{\xvec@height}{#2}%
+    \settodepth{\xvec@depth}{#2}%
+    \settowidth{\xvec@width}{#2}%
+  \fi%
+  \def\xvec@arg{#1}%
+  \def\xvec@dd{:}%
+  \def\xvec@d{.}%
+  \raisebox{.2ex}{\raisebox{\xvec@height}{\rlap{%
+    \kern.05em%  (Because left edge of drawing is at .05em)
+    \begin{tikzpicture}[scale=1]
+    \pgfsetroundcap
+    \draw (.05em,0)--(\xvec@width-.05em,0);
+    \draw (\xvec@width-.05em,0)--(\xvec@width-.15em, .075em);
+    \draw (\xvec@width-.05em,0)--(\xvec@width-.15em,-.075em);
+    \ifx\xvec@arg\xvec@d%
+      \fill(\xvec@width*.45,.5ex) circle (.5pt);%
+    \else\ifx\xvec@arg\xvec@dd%
+      \fill(\xvec@width*.30,.5ex) circle (.5pt);%
+      \fill(\xvec@width*.65,.5ex) circle (.5pt);%
+    \fi\fi%
+    \end{tikzpicture}%
+  }}}%
+  #2%
+}
+\makeatother
+
+\let\stdvec\vec
+% \renewcommand{\vec}[1]{\xvec[]{#1}}
+
+% --- Define \dvec and \ddvec for dotted and double-dotted vectors.
+\newcommand{\dvec}[1]{\xvec[.]{#1}}
+\newcommand{\ddvec}[1]{\xvec[:]{#1}}
+
+% Personalised macros
+\DeclareRobustCommand{\[}{\begin{equation}}
+\DeclareRobustCommand{\]}{\end{equation}}
+\let\myvec\vec
+\renewcommand{\vec}[1]{\mathbf{#1}} % Vector with varying height
+\newcommand{\hivec}[2][b]{\xvec[]{\vphantom{#1}#2}} % Vector with consistent height
+\newcommand{\abs}[1]{\ensuremath{\lvert #1 \rvert}}
+\newcommand{\round}[1]{\ensuremath{\partial #1}}
+\newcommand{\D}[1]{\ensuremath{\Delta #1}}
+\NewDocumentCommand \len { o m } {
+  \IfNoValueTF{#1} { \abs{\vec{#2}} } { \abs{\xvec[]{\vphantom{#1}#2}} }
+}
+\newcommand{\mat}[1]{\mathbf{#1}} % Matrix Notation
+\NewDocumentCommand \pafr { o m o m o } {%
+  \IfNoValueTF{#5} {%
+    \IfNoValueTF{#1} {%
+      \IfNoValueTF{#3} {%
+        \ensuremath{\frac{\round{#2}}{\round{#4}}}
+      } {%
+        \ensuremath{\frac{\round{#2}}{#3\,\round{#4}}}
+      }
+    } {%
+      \IfNoValueTF{#3} {%
+        \ensuremath{\frac{#1\,\round{#2}}{\round{#4}}}
+      } {%
+        \ensuremath{\frac{#1\,\round{#2}}{#3\,\round{#4}}}
+      }
+    }
+  } {
+    \IfNoValueTF{#1} {%
+      \IfNoValueTF{#3} {%
+        \ensuremath{\frac{\partial\sp{#5}#2}{\partial #4\sp{#5}}}
+      } {%
+        \ensuremath{\frac{\partial\sp{#5}#2}{#3\,\partial #4\sp{#5}}}
+      }
+    } {%
+      \IfNoValueTF{#5} {%
+        \ensuremath{\frac{#1\,\partial\sp{#5}#2}{\partial #4\sp{#5}}}
+      } {%
+        \ensuremath{\frac{#1\,\partial\sp{#5}#2}{#3\,\partial #4\sp{#5}}}
+      }
+    }
+  }
+}
+\NewDocumentCommand \difr { o m o m o } {%
+  \IfNoValueTF{#5} {%
+    \IfNoValueTF{#1} {%
+      \IfNoValueTF{#3} {%
+        \ensuremath{\frac{d #2}{d #4}}
+      } {%
+        \ensuremath{\frac{d #2}{#3\,d #4}}
+      }
+    } {%
+      \IfNoValueTF{#3} {%
+        \ensuremath{\frac{#1\,d #2}{d #4}}
+      } {%
+        \ensuremath{\frac{#1\,d #2}{#3\,d #4}}
+      }
+    }
+  } {
+    \IfNoValueTF{#1} {%
+      \IfNoValueTF{#3} {%
+        \ensuremath{\frac{d\sp{#5} #2}{d #4\sp{#5}}}
+      } {%
+        \ensuremath{\frac{d\sp{#5} #2}{#3\,d #4\sp{#5}}}
+      }
+    } {%
+      \IfNoValueTF{#5} {%
+        \ensuremath{\frac{#1\,d\sp{#5} #2}{d #4\sp{#5}}}
+      } {%
+        \ensuremath{\frac{#1\,d\sp{#5} #2}{#3\,d #4\sp{#5}}}
+      }
+    }
+  }
+}
+\NewDocumentCommand \VTP { o m m m } {%
+  \IfNoValueTF{#1} {%
+    \ensuremath{\vec{#2}\times\vec{#3}\times\vec{#4}}
+  } {
+    \ensuremath{\hivec[#1]{#2}\times\hivec[#1]{#3}\times\hivec[#1]{#4}}
+  }
+}
+\NewDocumentCommand \STP { o m m m } {%
+  \IfNoValueTF{#1} {%
+    \ensuremath{\vec{#2}\wedge\vec{#3}\wedge\vec{#4}}
+  } {
+    \ensuremath{\hivec[#1]{#2}\wedge\hivec[#1]{#3}\wedge\hivec[#1]{#4}}
+  }
+}
+\newcommand{\vecf}[2]{\ensuremath\vec{#1}\left(#2\right)}
+\newcommand{\grad}[1]{\ensuremath\nabla #1}
+\newcommand{\dive}[1]{\ensuremath\nabla\DOT{#1}}
+\newcommand{\curl}[1]{\ensuremath\nabla\times{#1}}
+\newcommand{\lapl}[1]{\ensuremath\nabla\sp{2}#1}
+\makeatletter
+\newcommand*{\DOT}{}% Check if undefined
+\DeclareRobustCommand*{\DOT}{%
+  \mathbin{\mathpalette\DOT@{}}%
+}
+\newcommand*{\DOT@scalefactor}{.5}
+\newcommand*{\DOT@widthfactor}{1.15}
+\newcommand*{\DOT@}[2]{%
+  % #1: math style
+  % #2: unused
+  \sbox0{$#1\vcenter{}$}% math axis
+  \sbox2{$#1\cdot\m@th$}%
+  \hbox to \DOT@widthfactor\wd2{%
+  \hfil
+  \raise\ht0\hbox{%
+    \scalebox{\DOT@scalefactor}{%
+    \lower\ht0\hbox{$#1\bullet\m@th$}%
+    }%
+  }%
+  \hfil
+  }%
+}
+\makeatother
+\NewDocumentCommand \uvec { o } {%
+  \IfValueTF{#1}{\ensuremath{\vec{a}\sb{#1}}}%
+    {\ensuremath{\vec{\mathrm{a}}}}
+}
+
+% % CODE
+% \NewDocumentCommand \mi { o } {%
+%   \IfValueTF{#1} {%
+%     \mintinline[#1]{<++>}%
+%   } {%
+%     \mintinline{<++>}%
+%   }%
+% }
+%
+% \SetupFloatingEnvironment{listing}{name=Code}
+% \captionsetup[listing]{aboveskip=0pt,belowskip=0pt,format=hang,font=small}
+% \NewDocumentCommand \im { o o m o } {%
+%   % \begin{framed}
+%   \IfNoValueTF{#2} {%
+%     \IfNoValueTF{#1} {%
+%       \inputminted[fontsize=\small,xleftmargin=0.25in,linenos,breaklines]%
+%         {<++>}{#3}%
+%     } {%
+%       \inputminted[fontsize=\small,xleftmargin=0.25in,linenos,breaklines,%
+%         firstline=#1,lastline=#1]{<++>}{#3}%
+%     }%
+%   } {%
+%     \inputminted[fontsize=\small,xleftmargin=0.25in,linenos,breaklines,%
+%       firstline=#1,lastline=#2]{<++>}{#3}%
+%     } \IfValueT{#4}{\widecaps[listing]{#4}}%
+%   % \end{framed}
+% }
+% \NewDocumentCommand \gob { m o o m o } {%
+% % \begin{framed}
+%   \IfNoValueTF{#3} {%
+%     \IfNoValueTF{#2} {%
+%       \inputminted[fontsize=\small,xleftmargin=1.25in,linenos,breaklines,%
+%         gobble=#1]{<++>}{#4}%
+%     } {%
+%       \inputminted[fontsize=\small,xleftmargin=0.25in,linenos,breaklines,%
+%         gobble=#1,firstline=#2,lastline=#2]{<++>}{#4}%
+%     }%
+%   } {%
+%     \inputminted[fontsize=\small,xleftmargin=0.25in,linenos,breaklines,%
+%       gobble=#1,firstline=#2,lastline=#3]{<++>}{#4}%
+%   } \IfValueT{#5}{\widecaps[listing]{#5}}%
+% % \end{framed}
+% }
+%
+% \DeclareFloatingEnvironment[name=Result]{result}
+% \captionsetup[result]{aboveskip=0pt,belowskip=0pt,format=hang,font=small}
+% \NewDocumentCommand \res { o o m o } {%
+% % \begin{framed}
+%   \IfNoValueTF{#2} {%
+%     \IfNoValueTF{#1} {%
+%       \lstinputlisting[basicstyle=\ttfamily\small,breaklines,%
+%         columns=fullflexible]{#3}%
+%     } {%
+%       \lstinputlisting[basicstyle=\ttfamily\small,breaklines,%
+%         columns=fullflexible,firstline=#1,lastline=#1]{#3}%
+%     }%
+%   } {%
+%     \lstinputlisting[basicstyle=\ttfamily\small,breaklines,%
+%       columns=fullflexible,firstline=#1,lastline=#2]{#3}%
+%   }%
+% % \end{framed}
+%   \IfValueT{#4}{\widecaps[result]{#4}}%
+% }
