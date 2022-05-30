@@ -233,7 +233,7 @@ wire [31:0] BP_CORRECT;
 hardware_counter m_bp_correct(
   .clk  (clk),
   .rstn (rstn),
-  .cond ((ex_branch || ex_jump[0]) && ~flush),
+  .cond (ex_branch && ~flush),
 
   .counter(BP_CORRECT)
 );
