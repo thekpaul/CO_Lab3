@@ -27,6 +27,16 @@ module branch_target_buffer #(
 
 reg [54 : 0] btb [0 : NUM_ENTRIES - 1];
 
+wire [21 : 0] a_tag;
+wire [21 : 0] u_tag;
+wire [7 : 0] a_idx;
+wire [7 : 0] u_idx;
+
+assign a_idx = pc[9 : 2];
+assign u_idx = resolved_pc[9 : 2];
+assign a_tag = pc[DATA_WIDTH - 1 : 10];
+assign u_tag = resolved_pc[DATA_WIDTH - 1 : 10];
+
 integer d;
 
 always @(*) begin // Reset BHR and PHT - Whenever
@@ -39,12 +49,9 @@ always @(*) begin // Reset BHR and PHT - Whenever
 
   end else begin
 
-    if (btb[pc[9 : 2]][53 : DATA_WIDTH] == pc[DATA_WIDTH - 1 : 10]) begin
-      hit = btb[pc[9 : 2]][54];
-      target_address = btb[pc[9 : 2]][DATA_WIDTH - 1 : 0];
- // end else begin
- //   hit = 1'b0;
- //   target_address = 32'h0000_0000;
+    if (btb[a_idx][53 : DATA_WIDTH] == a_tag) begin
+      hit = btb[a_idx][54];
+      target_address = btb[a_idx][DATA_WIDTH - 1 : 0];
     end
 
   end
@@ -54,10 +61,9 @@ always @(posedge clk) begin // Acculmulate Past Global History - Negative Clock
   if (update == 1'b1) begin
 
     // Save PC_Target based on Current ex_PC
-    btb[resolved_pc[9 : 2]][54] <= 1'b1; // VALID
-    btb[resolved_pc[9 : 2]][53 : DATA_WIDTH]
-      <= resolved_pc[DATA_WIDTH - 1 : 10];
-    btb[resolved_pc[9 : 2]][DATA_WIDTH - 1 : 0] <= resolved_pc_target;
+    btb[u_idx][54] <= 1'b1; // VALID
+    btb[u_idx][53 : DATA_WIDTH] <= u_tag;
+    btb[u_idx][DATA_WIDTH - 1 : 0] <= resolved_pc_target;
 
   end
 end

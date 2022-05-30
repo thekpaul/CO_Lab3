@@ -27,7 +27,12 @@ module gshare #(
 // TODO: Implement gshare branch predictor
 
 reg [7 : 0] bhr;
-reg [1 : 0] pht [0 : NUM_ENTRIES - 1];
+reg [COUNTER_WIDTH - 1 : 0] pht [0 : NUM_ENTRIES - 1];
+wire [7 : 0] a_idx;
+wire [7 : 0] u_idx;
+
+assign a_idx = pc[9 : 2] ^ bhr;
+assign u_idx = resolved_pc[9 : 2] ^ bhr;
 
 integer c;
 
@@ -41,10 +46,8 @@ always @(*) begin // Reset BHR and PHT - Whenever
 
   end else begin
 
-    // Locate Corresponding Count by XOR
-
     // Return Corresponding Count in Relation to `PRED`
-    pred = pht[pc[9 : 2] ^ bhr][1]; // Larger bit represents TAKEN value
+    pred = pht[a_idx][1]; // Larger bit represents TAKEN value
   end
 end
 
@@ -55,19 +58,15 @@ always @(posedge clk) begin // Acculmulate Past Global History - Negative Clock
     bhr <= (bhr << 1);
     bhr[0] <= (actually_taken == 1'b1) ? 1'b1 : 1'b0;
 
-    // Locate Corresponding Count by XOR
-
     // Update Corresponding Count in Relation to `TAKEN`
     case (actually_taken)
-      1'b1: pht[resolved_pc[9 : 2] ^ bhr]
-        <= (2'b11 == (pht[resolved_pc[9 : 2] ^ bhr]))
-          ? 2'b11 :  (pht[resolved_pc[9 : 2] ^ bhr] + 1'b1);
+      1'b1: pht[u_idx] <= ( 2'b11 == (pht[u_idx]) )
+                          ? 2'b11 :  (pht[u_idx] + 2'b01);
                 // TAKEN     => Add 1 unless MAX
-      1'b0: pht[resolved_pc[9 : 2] ^ bhr]
-        <= (2'b00 == (pht[resolved_pc[9 : 2] ^ bhr]))
-          ? 2'b00 :  (pht[resolved_pc[9 : 2] ^ bhr] - 1'b1);
+      1'b0: pht[u_idx] <= ( 2'b00 == (pht[u_idx]) )
+                          ? 2'b00 :  (pht[u_idx] - 2'b01);
                 // NOT TAKEN => Subtract 1 unless MIN
-      default: pht[resolved_pc[9 : 2] ^ bhr] <= pht[resolved_pc[9 : 2] ^ bhr];
+      default: pht[u_idx] <= pht[u_idx];
                 // ERROR => Keep Original Value
     endcase
 

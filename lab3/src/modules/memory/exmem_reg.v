@@ -1,6 +1,5 @@
 //exmem_reg.v
 
-
 module exmem_reg #(
   parameter DATA_WIDTH = 32
 )(

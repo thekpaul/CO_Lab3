@@ -450,12 +450,14 @@ mux_3x1 muxu(ex_ui,
 
 assign alu_in2 = (ex_alusrc == 1'b0) ? fwd_data2 : ex_sextimm;
 
+wire [DATA_WIDTH - 1 : 0] alu_result;
+
 alu m_alu(
   .alu_func (alu_func),
   .in_a     (alu_in1),
   .in_b     (alu_in2), // is input with reg allowed??
 
-  .result   (ex_alu_result),
+  .result   (alu_result),
   .check    (alu_check)
 );
 
@@ -491,6 +493,12 @@ mux_2x1 dest(ex_taken || ex_jump[0],
   ex_pc_plus_4, // 0 => Not Branching, PC + 4 is fed
   ex_move_dest, // 1 => Branch or Jump, Branch Target or Jump Address is fed
   ex_pc_target
+);
+
+mux_2x1 j_rd(ex_jump[0],
+  alu_result,   // 0 => NOT Jump, Pass ALU_Result
+  ex_pc_plus_4, // 1 => Jump, PC + 4
+  ex_alu_result
 );
 
 assign ex_writedata = fwd_data2;
